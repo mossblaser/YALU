@@ -1,0 +1,29 @@
+#!/usr/bin/python
+# Yet Another Level Up: FVWM configuration "system"
+#     ~ by Jonathan Heathcote 2009, Licence: GPLv3
+#
+# Filename: yalu
+#   yalu is an attempt to recreate the functionality and ease of configuration
+# that is found in the `Another Level Up' configuration files made by John
+# Latham of the University of Manchester CompSci department. yalu, however, will
+# be different in a few key areas:
+#   * yalu is configurable using a proc-style interface rather than a mix of
+#     different shell, m4 and fvwm scripts.
+#   * yalu is a configuration file generator at heart rather than an actual set
+#     of config files.
+#   * yalu should be a lot more compact and hopefully a little more organised as
+#     it is beginning from scratch.
+#   By using a directory tree within the user's home folder yalu can be
+# configured by far more "dumb" programs and scripts: no need to parse scripts
+# or config files if you want to make a new interface, simply dump or even
+# link(!) a file in the right place.
+
+import os, sys, help
+
+def yaluRun(fileName, *args):
+	if len(args) == 0:
+		help.yaluArgs()
+
+
+if __name__=="__main__":
+	yaluRun(*sys.argv);
