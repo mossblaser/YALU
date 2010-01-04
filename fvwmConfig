@@ -1,69 +1,183 @@
- ########################################################
-##########################################################
-####                                                  ####
-####    Jonny's FVWM Configuration!                   ####
-####    "YetAnotherLevelUp"  ~(c) 2009                ####
-####                                                  ####
-##########################################################
- ########################################################
+# YetAnotherLevelUp (YALU), an FVWM Configuration
+#   ~ Jonathan Heathcote
+#   ~ September 2009 - Present
+#   ~ GNU GPLv3
+#
+# fvwmConfig:
+#   The main FVWM configuration file. Make FVWM load this config file to start
+#   YALU. YALU requires the following programs in order to run:
+#     * FVWM 2.4 or greater
+#     * Python 2.4-2.6
+#     * GNU Screen
+#     * Zenity
+#     * dmenu
 
- ########################
-## Fix numlock problems ##
- ########################
+### Fix numlock problems ###
 	IgnoreModifiers 2
 
- ##########################
-## Set the YALU directory ##
- ##########################
+### Set the YALU directory ###
 	SetEnv YALU "$[HOME]/.yalu"
 
- ###########################
-## Load user configuration ##
- ###########################
+### Load user configuration ###
 	Read "$[YALU]/yaluConfig"
 
- #########################
-## Load function library ##
- #########################
-	Read "$[YALU]/functions"
+################################################################################
+# Utility Functions                                                            #
+#   Various useful functions used in YALU                                      #
+################################################################################
+	DestroyFunc clearHistory
+	AddToFunc clearHistory
+		+ I Exec echo -n > "$[YALU]/logs/history"
 
- ##########################
-## Load the list of icons ##
- ##########################
+	# Function to set icons for window buttons (setButtonIcon buttonID buttonName
+	DestroyFunc setButtonIcon
+	AddToFunc setButtonIcon
+		+ I ButtonStyle $0 Pixmap "$[YALU]/images/$[yaluTheme]/clear.$[yaluImageType]"
+		+ I AddButtonStyle $0 ActiveUp Pixmap "$[YALU]/images/$[yaluTheme]/$1Button.$[yaluImageType]" -- Flat
+		+ I AddButtonStyle $0 ActiveDown Pixmap "$[YALU]/images/$[yaluTheme]/$1Button.$[yaluImageType]" -- Flat
+		+ I AddButtonStyle $0 Inactive Pixmap "$[YALU]/images/$[yaluTheme]/$1ButtonGrey.$[yaluImageType]" -- Flat
+
+	# Function which will Only carry out an action if clicked (not dragged)
+	DestroyFunc abortOnDrag
+	AddToFunc abortOnDrag
+		+ C $*
+		+ M Nop
+
+	# Do an action and then sort the icons
+	DestroyFunc doAndRearangeIcons
+	AddToFunc doAndRearangeIcons
+		+ I $*
+		+ I rearangeIcons
+
+	# Rearanges icons optinally
+	DestroyFunc rearangeIcons
+	AddToFunc rearangeIcons
+		+ I	Schedule 100 All (CurrentPage,Iconic) RecaptureWindow # Re-Place remaining icons
+
+	# Uniconify ready for use
+	DestroyFunc unIconify
+	AddToFunc unIconify
+		+ I Iconify False
+		+ I WarpToWindow 50% 50%
+		+ I	rearangeIcons
+
+	# Uniconify the window to somewhere empty
+	DestroyFunc unIconifyToSpace
+	AddToFunc unIconifyToSpace
+		+ I Iconify False
+		+ I PlaceAgain
+		+ I	rearangeIcons
+
+	# Move the current window to the given page/desktop
+	#   eg: moveAndGoTo Page 0p -1p
+	#       moveAndGoTo Desk 1 0 0 1
+	DestroyFunc moveAndGoTo
+	AddToFunc moveAndGoTo
+		+ I Raise
+		+ I MoveTo$*
+		+ I Goto$*
+
+	# 'Fling' Windows
+	AddToFunc flingRight
+		+ I	Maximize False
+		+ I	Maximize True 0 100
+		+ I	AnimatedMove -0 0 Warp
+	AddToFunc flingLeft
+		+ I	Maximize False
+		+ I	Maximize True 0 100
+		+ I	AnimatedMove 0 0 Warp
+	AddToFunc flingUp
+		+ I	Maximize False
+		+ I	Maximize True 100 0
+		+ I	AnimatedMove 0 0 Warp
+	AddToFunc flingDown
+		+ I	Maximize False
+		+ I	Maximize True 100 0
+		+ I	AnimatedMove 0 -0 Warp
+
+	# 'Thrown' windows
+	AddToFunc throwRight
+		+ I	AnimatedMove -0 w Warp
+	AddToFunc throwLeft
+		+ I	AnimatedMove 0 w Warp
+	AddToFunc throwUp
+		+ I	AnimatedMove w 0 Warp
+	AddToFunc throwDown
+		+ I	AnimatedMove w -0 Warp
+
+### Load the list of icons ###
 	Read "$[YALU]/icons"
 
- ######################
-## Clean up functions ##
- ######################
+### Clean up functions ###
 	# System functions
 	DestroyFunc StartFunction
 	DestroyFunc InitFunction
 	DestroyFunc RestartFunction
 	DestroyFunc ExitFunction
 
- ######################
-## Enable FvwmConsole ##
- ######################
+### Enable FvwmConsole ###
 	AddToFunc StartFunction "I" Module FvwmCommandS
 
- #############
-## FvwmPager ##
- #############
-	Read "$[YALU]/pager"
+################################################################################
+# Pager                                                                        #
+#   Provides a pager to show desks and pages to the user                       #
+################################################################################
+	### Load FvwmPager ###
+		DestroyFunc setPager
+		AddToFunc setPager
+			+ I KillModule FvwmPager yaluPager
+			+ I Module FvwmPager yaluPager 0 $[yaluDesks]
+			+ I *yaluPager: Back black
+			+ I *yaluPager: Fore grey20
+			+ I *yaluPager: Columns    1
+			+ I *yaluPager: Geometry 150+0-0
+			+ I *yaluPager: LabelsBelow
+			+ I Style yaluPager Sticky,NoHandles,NoTitle,color grey/black
+		setPager
 
- ###############
-## FvwmButtons ##
- ###############
-	Read "$[YALU]/buttons"
+################################################################################
+# Tray                                                                         #
+#   Provides a tray containing a clock, system tray and load monitor           #
+################################################################################
+	DestroyFunc setButtons
+	AddToFunc setButtons
+		+ I KillModule FvwmButtons yaluButtons
+		+ I Module FvwmButtons yaluButtons
+		+ I *yaluButtons: Back black
+		+ I *yaluButtons: Fore white
+		+ I *yaluButtons: BoxSize smart
+		+ I *yaluButtons: Columns
+		+ I *yaluButtons: Rows 1
+		+ I *yaluButtons: Geometry 500x24-0-0
+		+ I *yaluButtons: Frame 0
+		+ I *yaluButtons: (1x1, Swallow "xload"\
+					"Exec exec xload -fg $fg -bg $bg -update 1 -nolabel -geometry -300-300")
+		+ I *yaluButtons: (3x1, Swallow (UseOld, Kill, NoHints) "stalonetray" \
+					"Exec exec stalonetray -bg $bg --no-shrink --icon-gravity W"\
+					Right)
+		+ I *yaluButtons: (1x1, Swallow (UseOld) "xclock" \
+					"Exec exec xclock -digital -brief -bg $bg -fg $fg -norender -padding 0"\
+					Right)
+		+ I Style yaluButtons Sticky,NoHandles,NoTitle,NeverFocus,color grey/black
+	setButtons
+	
+	# Super+Alt+Space To Raise Buttons
+	Key Space A M4 All ("yaluButtons") Raise
+	
+	# Ctl+Super+Alt+Space To Lower Buttons
+	Key Space A CM4 All ("yaluButtons") Lower
 
- ###############
-## Apply Theme ##
- ###############
+################################################################################
+# Theming                                                                      #
+#   Control strictly appearence-related aspects of the desktop with a theme    #
+#   config.                                                                    #
+################################################################################
 	Read "$[YALU]/themes/$[yaluTheme]"
 
- ##############################
-## Virtual Desktops and Pages ##
- ##############################
+################################################################################
+# Desks and Pages                                                              #
+#   Control the number of pages and desks available to the user.               #
+################################################################################
 	# The number of pages per desk
 	DestroyFunc setDesktopPages
 	AddToFunc setDesktopPages
@@ -82,9 +196,10 @@
 		+ I EdgeResistance $[yaluEdgeResistDelay] $[yaluSnapDistance]
 	#setEdgeResistDelay # Done by window snapping
 	
- ####################
-## Window Behaviour ##
- ####################
+################################################################################
+# Window Snapping                                                              #
+#   Control the number of pages and desks available to the user.               #
+################################################################################
 	# Window snapping
 	DestroyFunc setSnapDistance
 	AddToFunc setSnapDistance
@@ -92,83 +207,170 @@
 		+ I setEdgeResistDelay
 	setSnapDistance
 
- #########
-## Menus ##
- #########
-	# Load Menus
-	Read "$[YALU]/menus/launcher"
-	Read "$[YALU]/menus/yaluConfig"
-	Read "$[YALU]/menus/recentApp"
-	Read "$[YALU]/menus/appOutput"
-	Read "$[YALU]/menus/windowMenu"
-	Read "$[YALU]/menus/focus"
-	Read "$[YALU]/menus/place"
-	Read "$[YALU]/menus/deskConfig"
+################################################################################
+# Menus                                                                        #
+#   Define each of the different menus that can be used.                       #
+################################################################################
+	### Launcher ###
+	DestroyMenu launcher
+	AddToMenu launcher "Launch" Title
+	 + "Something went wrong..." -
+	 + "" Nop
+	 + "" Popup MenuFvwmRoot
+	PipeRead "$[YALU]/bin/yaluMainMenu"
 	
-	# Link menus to shortcuts on startup
+	AddToFunc yaluApplyMenus
+	 + I Mouse 1 R N Menu launcher # Middle-click desktop
+	 + I Key F1 A M Menu launcher # Alt+F1 everywhere else
+	
+	### Application History List ###
+	AddToMenu yaluRecentApp "Oops! Something went wrong with yaluMenuHistory" Title
+		+ DynamicPopupAction PipeRead "$[YALU]/bin/yaluMenuAppHistory"
+	
+	AddToFunc yaluApplyMenus
+		+ I Mouse 3 R N Menu yaluRecentApp # Right-click desktop
+
+	### Application History Configuration Menu ###
+	DestroyMenu yaluRecentAppConfig
+	AddToMenu yaluRecentAppConfig
+		+ DynamicPopupAction PipeRead "$[YALU]/bin/yaluAppHistoryMode"
+		+ "&Recently Used" PipeRead '$[YALU]/bin/yaluConfig yaluRecentType "Recently Used"'
+		+ "&Frequently Used" PipeRead '$[YALU]/bin/yaluConfig yaluRecentType "Frequently Used"'
+	
+	### Application output viewer menu ###
+	AddToMenu yaluAppOutput "Oops! Something went wrong!" Title
+		+ DynamicPopupAction PipeRead "$[YALU]/bin/yaluAppOutput"
+	
+	AddToFunc yaluApplyMenus
+		+ I Mouse 3 R M Menu yaluAppOutput # Alt+Right-click desktop
+	
+	### Window Menu ###
+	DestroyMenu windowMenu
+	AddToMenu windowMenu
+	 + "Clickme!" Current echo $[w.name]
+	 + "Toolbar" Pick Exec exec xmessage $[w.class]
+	 + "Coming soon..." -
+	
+	### Focus Mode Configuration Menu ###
+	DestroyMenu windowFocusMode
+	AddToMenu windowFocusMode "Window Focus Mode" Title
+	 + DynamicPopupAction PipeRead "$[YALU]/bin/yaluFocusMode"
+	 + "Something went wrong..." -
+	 + "" Nop
+	 + "" Popup MenuFvwmRoot
+	PipeRead "$[YALU]/bin/yaluFocusMode"
+	
+	### Placement Mode Configuration Menu ###
+	DestroyMenu windowPlaceMode
+	AddToMenu windowPlaceMode "Window Placement Mode" Title
+	 + DynamicPopupAction PipeRead "$[YALU]/bin/yaluPlaceMode"
+	 + "Something went wrong..." -
+	 + "" Nop
+	 + "" Popup MenuFvwmRoot
+	PipeRead "$[YALU]/bin/yaluPlaceMode"
+	
+	### Desktop/Paging Configuration Menu ###
+	DestroyMenu deskConfig
+	AddToMenu deskConfig "Desks and Pages" Title
+	 + "Number of Desks" Popup desksConfig
+	 + "Horizontal Pages Per Desk" Popup deskWidthConfig
+	 + "Vertical Pages Per Desk" Popup deskHeightConfig
+	 + "" Nop
+	 + "Horizontal Screen Edge Jump Size" Popup edgeJumpWidthConfig
+	 + "Vertical Screen Edge Jump Size" Popup edgeJumpHeightConfig
+	 + "Edge Jump Delay" Popup edgeResistDelayConfig
+	PipeRead "$[YALU]/bin/yaluDeskConfig all"
+	
+	
+	### Main Configuration Menu ###
+	DestroyMenu yaluConfig
+	AddToMenu yaluConfig "YALU Configuration" Title
+		+ "&Window Placement Mode" Popup windowPlaceMode
+		+ "Window Focus &Mode" Popup windowFocusMode
+		+ "Window &Snapping Distance" Popup windowSnapConfig
+		+ "" Nop
+		+ "Alt-Resize Corner" Popup altResizeConfig
+		+ "" Nop
+		+ "Desks and Pages" Popup deskConfig
+		+ "" Nop
+		+ "Edit Launcher" Exec exec $[yaluEditor] "$[YALU]/menu"
+		+ "Command Output" Popup yaluAppOutput
+		+ "Program &History order" Popup yaluRecentAppConfig
+		+ "%$[yaluDeleteButton]%&Clear Program History" clearHistory
+		+ "" Nop
+		+ "&FVWM Menu%$[yaluFvwmLogo]%" Popup MenuFvwmRoot
+	AddToFunc yaluApplyMenus
+		+ I Mouse 2 R N Menu yaluConfig # Middle-click desktop
+		+ I Key Escape A M Menu yaluConfig # Alt+F1 everywhere else
+	PipeRead "$[YALU]/bin/yaluSnapConfig"
+	PipeRead "$[YALU]/bin/yaluAltResizeConfig"
+	
+	### Link menus to shortcuts on startup ###
 	AddToFunc StartFunction
 		+ I yaluApplyMenus
 
- ######################
-## Keyboard Shortcuts ##
- ######################	
-	# Window List
-	Key Tab A M WindowList # Alt+Tab
-	
-	# Paging function preparation
-	DestroyFunc setPagingKeys
-	
-	# Page Navigation
-	AddToFunc setPagingKeys
-		+ I Key Tab A CM GotoPage prev # Toggle, Ctrl+Alt+Tab
-		+ I Key Right A CM GotoPage +1p 0p # Ctrl+Alt+Right
-		+ I Key Left A CM GotoPage -1p 0p # Ctrl+Alt+Left
-		+ I Key Up A CM GotoPage 0p -1p # Ctrl+Alt+Up
-		+ I Key Down A CM GotoPage 0p +1p # Ctrl+Alt+Down
-	
-	# Page-Move
-	AddToFunc setPagingKeys
-		+ I Key Tab A CM4 moveAndGoTo Page prev # Toggle, Ctrl+Super+Alt+Tab
-		+ I Key Right A CM4 moveAndGoTo Page +1p 0p # Ctrl+Super+Alt+Right
-		+ I Key Left A CM4 moveAndGoTo Page -1p 0p # Ctrl+Super+Alt+Left
-		+ I Key Up A CM4 moveAndGoTo Page 0p -1p # Ctrl+Super+Alt+Up
-		+ I Key Down A CM4 moveAndGoTo Page 0p 1p # Ctrl+Super+Alt+Down
-	
-	# Desktop Navigation
-	AddToFunc setPagingKeys
-		+ I Key Tab A CMS GotoDesk prev 0 $[yaluDesks] # Toggle, Ctrl+Shift+Alt+Tab
-		+ I Key Right A CMS GotoDesk 1 0 0 $[yaluDesks] # Ctrl+Shift+Alt+Right
-		+ I Key Left A CMS GotoDesk -1 0 0 $[yaluDesks] # Ctrl+Shift+Alt+Left
-		+ I Key Down A CMS GotoDesk 1 0 0 $[yaluDesks] # Ctrl+Shift+Alt+Down
-		+ I Key Up A CMS GotoDesk -1 0 0 $[yaluDesks] # Ctrl+Shift+Alt+Up
+################################################################################
+# Keyboard Shortcuts                                                           #
+#   Set keyboard shortcuts for useful actions.                                 #
+################################################################################
+	### General ###
+		# Window List
+		Key Tab A M WindowList # Alt+Tab
+		
+		# Paging function preparation
+		DestroyFunc setPagingKeys
+		
+		# Page Navigation
+		AddToFunc setPagingKeys
+			+ I Key Tab A CM GotoPage prev # Toggle, Ctrl+Alt+Tab
+			+ I Key Right A CM GotoPage +1p 0p # Ctrl+Alt+Right
+			+ I Key Left A CM GotoPage -1p 0p # Ctrl+Alt+Left
+			+ I Key Up A CM GotoPage 0p -1p # Ctrl+Alt+Up
+			+ I Key Down A CM GotoPage 0p +1p # Ctrl+Alt+Down
+		
+		# Page-Move
+		AddToFunc setPagingKeys
+			+ I Key Tab A CM4 moveAndGoTo Page prev # Toggle, Ctrl+Super+Alt+Tab
+			+ I Key Right A CM4 moveAndGoTo Page +1p 0p # Ctrl+Super+Alt+Right
+			+ I Key Left A CM4 moveAndGoTo Page -1p 0p # Ctrl+Super+Alt+Left
+			+ I Key Up A CM4 moveAndGoTo Page 0p -1p # Ctrl+Super+Alt+Up
+			+ I Key Down A CM4 moveAndGoTo Page 0p 1p # Ctrl+Super+Alt+Down
+		
+		# Desktop Navigation
+		AddToFunc setPagingKeys
+			+ I Key Tab A CMS GotoDesk prev 0 $[yaluDesks] # Toggle, Ctrl+Shift+Alt+Tab
+			+ I Key Right A CMS GotoDesk 1 0 0 $[yaluDesks] # Ctrl+Shift+Alt+Right
+			+ I Key Left A CMS GotoDesk -1 0 0 $[yaluDesks] # Ctrl+Shift+Alt+Left
+			+ I Key Down A CMS GotoDesk 1 0 0 $[yaluDesks] # Ctrl+Shift+Alt+Down
+			+ I Key Up A CMS GotoDesk -1 0 0 $[yaluDesks] # Ctrl+Shift+Alt+Up
 
-	# Desk-Move
-	AddToFunc setPagingKeys
-		+ I Key Tab A CMS4 moveAndGoTo Desk prev 0 $[yaluDesks] # Toggle, Ctrl+Shift+Alt+Tab
-		+ I Key Right A CMS4 moveAndGoTo Desk 1 0 0 $[yaluDesks] # Ctrl+Shift+Alt+Right
-		+ I Key Left A CMS4 moveAndGoTo Desk -1 0 0 $[yaluDesks] # Ctrl+Shift+Alt+Left
-		+ I Key Up A CMS4 moveAndGoTo Desk -1 0 0 $[yaluDesks] # Ctrl+Shift+Alt+Up
-		+ I Key Down A CMS4 moveAndGoTo Desk 1 0 0 $[yaluDesks] # Ctrl+Shift+Alt+Down
+		# Desk-Move
+		AddToFunc setPagingKeys
+			+ I Key Tab A CMS4 moveAndGoTo Desk prev 0 $[yaluDesks] # Toggle, Ctrl+Shift+Alt+Tab
+			+ I Key Right A CMS4 moveAndGoTo Desk 1 0 0 $[yaluDesks] # Ctrl+Shift+Alt+Right
+			+ I Key Left A CMS4 moveAndGoTo Desk -1 0 0 $[yaluDesks] # Ctrl+Shift+Alt+Left
+			+ I Key Up A CMS4 moveAndGoTo Desk -1 0 0 $[yaluDesks] # Ctrl+Shift+Alt+Up
+			+ I Key Down A CMS4 moveAndGoTo Desk 1 0 0 $[yaluDesks] # Ctrl+Shift+Alt+Down
+		
+		# Focus Direction
+		AddToFunc setPagingKeys
+			+ I Key Right A 4 Direction East (AcceptsFocus) WarpToWindow 50% 50% # Super+Right
+			+ I Key Left A 4 Direction West (AcceptsFocus) WarpToWindow 50% 50% # Super+Left
+			+ I Key Up A 4 Direction North (AcceptsFocus) WarpToWindow 50% 50% # Super+Up
+			+ I Key Down A 4 Direction South (AcceptsFocus) WarpToWindow 50% 50% # Super+Down
+		
+		# Flinging and Throwing Functions
+		AddToFunc bindFlingAndThrow
+			+ I Key $0 A C4 fling$0
+			+ I Key $0 A M4 throw$0
+		bindFlingAndThrow Right
+		bindFlingAndThrow Left
+		bindFlingAndThrow Up
+		bindFlingAndThrow Down
+		
+		setPagingKeys
 	
-	# Focus Direction
-	AddToFunc setPagingKeys
-		+ I Key Right A 4 Direction East (AcceptsFocus) WarpToWindow 50% 50% # Super+Right
-		+ I Key Left A 4 Direction West (AcceptsFocus) WarpToWindow 50% 50% # Super+Left
-		+ I Key Up A 4 Direction North (AcceptsFocus) WarpToWindow 50% 50% # Super+Up
-		+ I Key Down A 4 Direction South (AcceptsFocus) WarpToWindow 50% 50% # Super+Down
-	
-	# Flinging and Throwing Functions
-	AddToFunc bindFlingAndThrow
-		+ I Key $0 A C4 fling$0
-		+ I Key $0 A M4 throw$0
-	bindFlingAndThrow Right
-	bindFlingAndThrow Left
-	bindFlingAndThrow Up
-	bindFlingAndThrow Down
-	
-	setPagingKeys
-	
-	# Window Control
+	### Window Control ###
 		# Close
 		Key F4 A M Close # Graceful Close, Alt+F4
 		Key F4 A M4 Delete # Forceful Close, Alt+Super+F4
@@ -191,9 +393,7 @@
 		
 		# Sticky window
 		Key Space A SM Stick # Shift+Alt+Space
-	
-	
-	# Window meta-control
+		
 		# Re-place window
 		Key F9 A M PlaceAgain Anim # Alt+F9
 		
@@ -203,9 +403,10 @@
 		# Re-draw window
 		Key F10 A M RefreshWindow # Alt+F10
 
- ##################
-## Icon Behaviour ##
- ##################
+################################################################################
+# Iconified Window Behaviour                                                   #
+#   Control what happens to iconified windows when the user clicks on them.    #
+################################################################################
 	# Click to open
 	DestroyFunc mouseUnIconify
 	AddToFunc mouseUnIconify
@@ -245,10 +446,11 @@
 	
 	# Middle click to force rearange
 	Mouse 2 I N rearangeIcons
-	
- ###############################
-## Alt-Whole window Operations ##
- ###############################
+
+################################################################################
+# Alt-Click Actions                                                            #
+#   Actions that occur when alt and a mouse button is held down on a window.   #
+################################################################################
 	# Alt-drag
 	DestroyFunc altDrag
 	AddToFunc altDrag
