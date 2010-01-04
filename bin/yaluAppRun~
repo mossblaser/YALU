@@ -1,0 +1,16 @@
+#!/bin/bash
+
+echo "`echo "$*" | tr "\n" " "`" >> "$YALU/logs/history"
+
+if which screen &> /dev/null; then
+	if [ "$1" != "" ]; then
+		screen -d -m -S "yalu_$$_$1" "$*"
+	else
+		(eval $*)&
+	fi
+else
+	bash -c "$*" &> "$YALU/logs/appLogs/LIVE_$$_$1"
+	CMD_EXIT="$?"
+	rm -f "$YALU/logs/appLogs/LIVE_$$_$1"
+	exit "$CMD_EXIT"
+fi

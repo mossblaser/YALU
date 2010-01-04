@@ -1,0 +1,22 @@
+#!/bin/bash
+
+ #########
+## Reset ##
+ #########
+	echo "DestroyMenu recreate yaluRecentAppConfig"
+	echo "AddToMenu yaluRecentAppConfig DynamicPopupAction PipeRead \"\$[YALU]/bin/yaluAppHistoryMode\""
+
+function printHistoryMode {
+	if [ "$1" == "$yaluRecentType" ]; then
+		icon="\$[YALU]/images/\$[yaluTheme]/radioButtonSel.\$[yaluImageType]"
+	else
+		icon="\$[YALU]/images/\$[yaluTheme]/radioButtonNorm.\$[yaluImageType]"
+	fi
+	echo "AddToMenu yaluRecentAppConfig \"%$icon%$1\" PipeRead \"\$[YALU]/bin/yaluConfig yaluRecentType \\\"$1\\\"\""
+} # function printFocusMode
+
+ ###############
+## Focus modes ##
+ ###############
+	printHistoryMode "Recently Used"
+	printHistoryMode "Frequently Used"

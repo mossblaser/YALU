@@ -1,0 +1,27 @@
+#!/bin/bash
+# Generates the menus required to configure window snapping
+
+# Generate a menu item
+# Args: "MenuName" "Text" "yaluConfig Option" "value" "current value"
+function generateChoice {
+	if [ "$4" == "$5" ]; then
+		icon="\$[YALU]/images/\$[yaluTheme]/radioButtonSel.\$[yaluImageType]"
+	else
+		icon="\$[YALU]/images/\$[yaluTheme]/radioButtonNorm.\$[yaluImageType]"
+	fi
+	echo "AddToMenu \"$1\" \"%$icon%$2\" PipeRead \"\$[YALU]/bin/yaluConfig $3 $4\""
+} # function generateChoice
+
+
+echo "DestroyMenu recreate windowSnapConfig"
+echo "AddToMenu windowSnapConfig DynamicPopupAction PipeRead \"\$[YALU]/bin/yaluSnapConfig\""
+function addChoices {
+	for i in $(seq $* ); do
+		generateChoice "windowSnapConfig" "${i}px" "snapDistance" "$i" "$yaluSnapDistance"
+	done
+} # function addChoices
+
+generateChoice "windowSnapConfig" "Disabled" "snapDistance" "0" "$yaluSnapDistance"
+addChoices 2 5
+addChoices 10 5 25
+addChoices 50 25 200

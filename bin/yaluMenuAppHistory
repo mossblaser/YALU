@@ -1,0 +1,26 @@
+#!/bin/bash
+# Generates a menu for the recently/frequently used apps list
+
+echo "DestroyMenu recreate yaluRecentApp"
+
+echo "AddToMenu yaluRecentApp \"$yaluRecentType\" Title"
+echo "AddToMenu yaluRecentApp DynamicPopupAction PipeRead \"\$[YALU]/bin/yaluMenuAppHistory\""
+
+if [ ! -d "$YALU/logs/appLogs/" ]; then
+	echo "ERROR: yaluAppRun: appLogs directory does not exist (tip: make sure $YALU is defined)." >&2
+else
+	(
+		if [ "$yaluRecentType" == "Recently Used" ]; then
+			cat "$YALU/logs/history" | tac | uniq | head -n 15
+		elif [ "$yaluRecentType" == "Frequently Used" ]; then
+			tail -n 100 "$YALU/logs/history" | sort | uniq -c | sort -nr \
+				| sed -re "s/[[:space:]]*[[:digit:]]+ (.*)/\1/"
+		fi
+	) | while read line; do
+		echo "AddToMenu yaluRecentApp \"%\$[yaluRunButton]%$line\" Exec exec \$[YALU]/bin/yaluAppRun $line"
+	done
+fi
+
+echo "AddToMenu yaluRecentApp \"\" Nop"
+echo "AddToMenu yaluRecentApp \"%\$[yaluDeleteButton]%&Clear History\" clearHistory"
+

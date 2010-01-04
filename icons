@@ -1,0 +1,28 @@
+ ########################################################
+##########################################################
+####                                                  ####
+####    Sets EnvVariables for YALU icons              ####
+####    "YetAnotherLevelUp"  ~(c) 2009                ####
+####                                                  ####
+##########################################################
+ ########################################################
+
+ ##################
+## Window Borders ##
+ ##################
+SetEnv yaluMaximizeButton "$[YALU]/images/$[yaluTheme]/maximizeButton.$[yaluImageType]"
+SetEnv yaluMinimizeButton "$[YALU]/images/$[yaluTheme]/minimizeButton.$[yaluImageType]"
+SetEnv yaluCloseButton "$[YALU]/images/$[yaluTheme]/closeButton.$[yaluImageType]"
+
+ ###########
+## Buttons ##
+ ###########
+SetEnv yaluDeleteButton "$[YALU]/images/$[yaluTheme]/deleteButton.$[yaluImageType]"
+SetEnv yaluRunButton "$[YALU]/images/$[yaluTheme]/runButton.$[yaluImageType]"
+
+ ###################
+## Logos and Icons ##
+ ###################
+SetEnv yaluFvwmLogo "$[YALU]/images/$[yaluTheme]/fvwmLogo.$[yaluImageType]"
+
+

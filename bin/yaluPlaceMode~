@@ -1,0 +1,25 @@
+#!/bin/bash
+
+ #########
+## Reset ##
+ #########
+	echo "DestroyMenu recreate windowPlaceMode"
+	echo "AddToMenu windowPlaceMode \"Window Placement Mode\" Title"
+	echo "AddToMenu windowPlaceMode DynamicPopupAction PipeRead \"\$[YALU]/bin/yaluPlaceMode\""
+
+function printPlaceMode {
+	if [ "$1" == "$yaluPlaceMode" ]; then
+		icon="\$[YALU]/images/\$[yaluTheme]/radioButtonSel.\$[yaluImageType]"
+	else
+		icon="\$[YALU]/images/\$[yaluTheme]/radioButtonNorm.\$[yaluImageType]"
+	fi
+	echo "AddToMenu windowPlaceMode \"%$icon%$2\" PipeRead \"\$[YALU]/bin/yaluConfig placeMode $1\""
+} # function printPlaceMode
+
+ ###############
+## Place modes ##
+ ###############
+	printPlaceMode "TileCascadePlacement" "Tile if possible, then cascade"
+	printPlaceMode "TileManualPlacement" "Tile if possible, then manualy place"
+	printPlaceMode "MinOverlapPlacement" "Tile with as little overlap as possible"
+	printPlaceMode "MinOverlapPercentPlacement" "Tile with as little % overlap as possible"

@@ -1,0 +1,82 @@
+#!/bin/bash
+
+# Set a value in the config file
+function setValue {
+	newConfig="$(
+		sed -re "s/^SetEnv $1 .*$/SetEnv $1 \"$2\"/" < "$YALU/yaluConfig"
+	)"
+	echo "$newConfig" > "$YALU/yaluConfig"
+	echo "SetEnv $1 \"$2\""
+} # function setValue
+
+# Set a style property in the config file
+function setStyle {
+	newConfig="$(
+		sed -re "s/^Style [*] $1$/Style * $2/" < "$YALU/yaluConfig"
+	)"
+	echo "$newConfig" > "$YALU/yaluConfig"
+	echo "$(grep "^Style [*] $2" < "$YALU/yaluConfig")"
+} # function setValue
+
+case $1 in
+	"yaluRecentType") # Toggle recent app list sorting
+		if [ "$2" == "" ]; then
+			if [ "$yaluRecentType" == "Recently Used" ]; then
+				newVal="Frequently Used"
+			else
+				newVal="Recently Used"
+			fi
+		else
+			newVal="$2"
+		fi
+		setValue "yaluRecentType" "$newVal"
+	;;
+	"focusMode") # Set the window focusing mode
+		setStyle "$yaluFocusMode" "$2"
+		setValue "yaluFocusMode" "$2"
+	;;
+	"placeMode") # Set the window placement mode
+		setStyle "$yaluPlaceMode" "$2"
+		setValue "yaluPlaceMode" "$2"
+	;;
+	"desks") # Set the number of desks
+		setValue "yaluDesks" "$2"
+		echo "setPagingKeys"
+		echo "setPager"
+	;;
+	"deskWidth") # Set the number columns of pages on a desk
+		setValue "yaluDeskWidth" "$2"
+		echo "setDesktopPages"
+		echo "setPager"
+	;;
+	"deskHeight") # Set the number rows of pages on a desk
+		setValue "yaluDeskHeight" "$2"
+		echo "setDesktopPages"
+		echo "setPager"
+	;;
+	"edgeJumpWidth") # Set screen jump size
+		setValue "yaluEdgeJumpWidth" "$2"
+		echo "setEdgeJump"
+	;;
+	"edgeJumpHeight") # Set screen jump size
+		setValue "yaluEdgeJumpHeight" "$2"
+		echo "setEdgeJump"
+	;;
+	"edgeResistDelay") # Set screen jump size
+		setValue "yaluEdgeResistDelay" "$2"
+		echo "setEdgeResistDelay"
+	;;
+	"snapDistance") # Set window snapping distance
+		setValue "yaluSnapDistance" "$2"
+		echo "setSnapDistance"
+	;;
+	"resizeCorner") # Set window snapping distance
+		setValue "yaluResizeCorner" "$2"
+	;;
+	"windowColour") # Set window colour for a certain window class
+		setValue "yaluResizeCorner" "$2"
+	;;
+	*)
+		echo "echo ERROR: Unknown Config Option '$1'"
+	;;
+esac

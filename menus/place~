@@ -1,0 +1,21 @@
+ ########################################################
+##########################################################
+####                                                  ####
+####    Window placement mode setter                  ####
+####    "YetAnotherLevelUp"  ~(c) 2009                ####
+####                                                  ####
+##########################################################
+ ########################################################
+
+ ########
+## Menu ##
+ ########
+DestroyMenu windowFocusMode
+AddToMenu windowFocusMode "Window Placement Mode" Title
+ + DynamicPopupAction PipeRead "$[YALU]/bin/yaluPlaceMode"
+ + "Something went wrong..." -
+ + "" Nop
+ + "" Popup MenuFvwmRoot
+
+PipeRead "$[YALU]/bin/yaluPlaceMode"
+

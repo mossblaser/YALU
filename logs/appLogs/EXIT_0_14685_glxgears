@@ -1,0 +1,5 @@
+Running synchronized to the vertical refresh.  The framerate should be
+approximately the same as the monitor refresh rate.
+104906 frames in 5.0 seconds = 20981.125 FPS
+104964 frames in 5.0 seconds = 20992.640 FPS
+105096 frames in 5.0 seconds = 21019.179 FPS

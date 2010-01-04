@@ -1,0 +1,15 @@
+#!/bin/bash
+# Start dmenu with a list of programs to run
+PATH="$PATH:$HOME/bin"
+
+function listProgramsInPath {
+	echo "$PATH" | tr ":" "\n" | while read PATHLocation; do
+		(
+			cd "$PATHLocation" &> /dev/null &&\
+			find * -maxdepth 0 -executable
+		)
+	done
+} # function listProgramsInPath
+
+exec $YALU/bin/yaluAppRun $(listProgramsInPath | dmenu -i)
+

@@ -1,0 +1,88 @@
+#!/bin/bash
+# Generates the menus required to configure desks/pages
+
+# Generate a menu item
+# Args: "MenuName" "Text" "yaluConfig Option" "value" "current value"
+function generateChoice {
+	if [ "$4" == "$5" ]; then
+		icon="\$[YALU]/images/\$[yaluTheme]/radioButtonSel.\$[yaluImageType]"
+	else
+		icon="\$[YALU]/images/\$[yaluTheme]/radioButtonNorm.\$[yaluImageType]"
+	fi
+	echo "AddToMenu \"$1\" \"%$icon%$2\" PipeRead \"\$[YALU]/bin/yaluConfig $3 $4\""
+} # function generateChoice
+
+
+# Generates a desksConfig menu (number of desks)
+function deskConfig {
+	echo "DestroyMenu recreate desksConfig"
+	echo "AddToMenu desksConfig DynamicPopupAction PipeRead \"\$[YALU]/bin/yaluDeskConfig deskConfig\""
+	for i in $(seq 1 10); do
+		generateChoice "desksConfig" "$i" "desks" "$(( $i - 1 ))" "$yaluDesks"
+	done
+} # function deskConfig
+
+# Generates a desk{Width,Height}Config menu (number of desks)
+# Args: "Width" | "Height"
+function desk_Config {
+	echo "DestroyMenu recreate desk$1Config"
+	echo "AddToMenu desk$1Config DynamicPopupAction PipeRead \"\$[YALU]/bin/yaluDeskConfig desk$1Config\""
+	currentValue="$(eval "echo $(echo "\$yaluDesk$1")")"
+	for i in $(seq 1 10); do
+		generateChoice "desk$1Config" "$i" "desk$1" "$i" "$currentValue"
+	done
+} # function desk_Config
+
+function deskWidthConfig {
+	desk_Config Width
+}
+function deskHeightConfig {
+	desk_Config Height
+}
+
+# Generates a edgeJump{Width,Height}Config menu
+# Args: "Width" | "Height"
+function edgeJump_Config {
+	echo "DestroyMenu recreate edgeJump$1Config"
+	echo "AddToMenu edgeJump$1Config DynamicPopupAction PipeRead \"\$[YALU]/bin/yaluDeskConfig edgeJump$1Config\""
+	currentValue="$(eval "echo $(echo "\$yaluEdgeJump$1")")"
+	
+	generateChoice "edgeJump$1Config" "Disabled" "edgeJump$1" "0" "$currentValue"
+	
+	for i in $(seq 10 10 90); do
+		generateChoice "edgeJump$1Config" "$i%%" "edgeJump$1" "$i" "$currentValue"
+	done
+	
+	generateChoice "edgeJump$1Config" "Whole Screen" "edgeJump$1" "100" "$currentValue"
+} # function desk_Config
+
+function edgeJumpWidthConfig {
+	edgeJump_Config Width
+}
+function edgeJumpHeightConfig {
+	edgeJump_Config Height
+}
+
+# Generates an edgeResistDelayConfig menu
+function edgeResistDelayConfig {
+	echo "DestroyMenu recreate edgeResistDelayConfig"
+	echo "AddToMenu edgeResistDelayConfig DynamicPopupAction PipeRead \"\$[YALU]/bin/yaluDeskConfig edgeResistDelayConfig\""
+	
+	generateChoice "edgeResistDelayConfig" "Disabled (Recommended)" "edgeResistDelay" "0" "$yaluEdgeResistDelay"
+	
+	for i in $(seq 1 9); do
+		generateChoice "edgeResistDelayConfig" "0.&$i sec" "edgeResistDelay" "${i}00" "$yaluEdgeResistDelay"
+	done
+} # function deskConfig
+
+
+function all {
+	deskConfig
+	deskWidthConfig
+	deskHeightConfig
+	edgeJumpWidthConfig
+	edgeJumpHeightConfig
+	edgeResistDelayConfig
+}
+
+eval $1

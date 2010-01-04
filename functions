@@ -1,0 +1,88 @@
+ ########################################################
+##########################################################
+####                                                  ####
+####    YALU Function Library                         ####
+####    "YetAnotherLevelUp"  ~(c) 2009                ####
+####                                                  ####
+##########################################################
+ ########################################################
+
+DestroyFunc clearHistory
+AddToFunc clearHistory
+	+ I Exec echo -n > "$[YALU]/logs/history"
+
+# Function to set icons for window buttons (setButtonIcon buttonID buttonName
+DestroyFunc setButtonIcon
+AddToFunc setButtonIcon
+	+ I ButtonStyle $0 Pixmap "$[YALU]/images/$[yaluTheme]/clear.$[yaluImageType]"
+	+ I AddButtonStyle $0 ActiveUp Pixmap "$[YALU]/images/$[yaluTheme]/$1Button.$[yaluImageType]" -- Flat
+	+ I AddButtonStyle $0 ActiveDown Pixmap "$[YALU]/images/$[yaluTheme]/$1Button.$[yaluImageType]" -- Flat
+	+ I AddButtonStyle $0 Inactive Pixmap "$[YALU]/images/$[yaluTheme]/$1ButtonGrey.$[yaluImageType]" -- Flat
+
+# Function which will Only carry out an action if clicked (not dragged)
+DestroyFunc abortOnDrag
+AddToFunc abortOnDrag
+	+ C $*
+	+ M Nop
+
+# Do an action and then sort the icons
+DestroyFunc doAndRearangeIcons
+AddToFunc doAndRearangeIcons
+	+ I $*
+	+ I rearangeIcons
+
+# Rearanges icons optinally
+DestroyFunc rearangeIcons
+AddToFunc rearangeIcons
+	+ I	Schedule 100 All (CurrentPage,Iconic) RecaptureWindow # Re-Place remaining icons
+
+# Uniconify ready for use
+DestroyFunc unIconify
+AddToFunc unIconify
+	+ I Iconify False
+	+ I WarpToWindow 50% 50%
+	+ I	rearangeIcons
+
+# Uniconify the window to somewhere empty
+DestroyFunc unIconifyToSpace
+AddToFunc unIconifyToSpace
+	+ I Iconify False
+	+ I PlaceAgain
+	+ I	rearangeIcons
+
+# Move the current window to the given page/desktop
+#   eg: moveAndGoTo Page 0p -1p
+#       moveAndGoTo Desk 1 0 0 1
+DestroyFunc moveAndGoTo
+AddToFunc moveAndGoTo
+	+ I Raise
+	+ I MoveTo$*
+	+ I Goto$*
+
+# 'Fling' Windows
+AddToFunc flingRight
+	+ I	Maximize False
+	+ I	Maximize True 0 100
+	+ I	AnimatedMove -0 0 Warp
+AddToFunc flingLeft
+	+ I	Maximize False
+	+ I	Maximize True 0 100
+	+ I	AnimatedMove 0 0 Warp
+AddToFunc flingUp
+	+ I	Maximize False
+	+ I	Maximize True 100 0
+	+ I	AnimatedMove 0 0 Warp
+AddToFunc flingDown
+	+ I	Maximize False
+	+ I	Maximize True 100 0
+	+ I	AnimatedMove 0 -0 Warp
+
+# 'Thrown' windows
+AddToFunc throwRight
+	+ I	AnimatedMove -0 w Warp
+AddToFunc throwLeft
+	+ I	AnimatedMove 0 w Warp
+AddToFunc throwUp
+	+ I	AnimatedMove w 0 Warp
+AddToFunc throwDown
+	+ I	AnimatedMove w -0 Warp

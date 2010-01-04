@@ -1,0 +1,99 @@
+ ########################################################
+##########################################################
+####                                                  ####
+####    'Default' Theme for YALU                      ####
+####    "YetAnotherLevelUp"  ~(c) 2009                ####
+####                                                  ####
+##########################################################
+ ########################################################
+
+
+ ######################
+## Default Menu Style ##
+ ######################
+	MenuStyle * BorderWidth 0
+	MenuStyle * Background Grey20
+	MenuStyle * Foreground White
+	MenuStyle * HilightBack Grey40
+	MenuStyle * Hilight3DOff
+	MenuStyle * PopupImmediately
+	MenuStyle * AutomaticHotkeys
+
+ #####################
+## Window Move Style ##
+ #####################
+	# Don't show grids when altering windows
+	OpaqueMoveSize unlimited
+	Style * ResizeOpaque
+
+ ###################
+## Icon area style ##
+ ###################
+	Style * IconBox 800x600+0+0
+	Style * StickyIcon
+
+ ##################
+## Window Buttons ##
+ ##################
+	
+	# Top Right (Close)
+	setButtonIcon 2 "close"
+	Mouse 1 2 N abortOnDrag Close # Left-Click: Close
+	Mouse 1 2 4 abortOnDrag Delete # Super+Left-Click: Delete
+	Mouse 1 2 C abortOnDrag Destroy # Ctl+Left-Click: Destroy
+	
+	# Top Right (Maximize)
+	setButtonIcon 4 "maximize"
+	Mouse 1 4 N abortOnDrag Maximize # Left-Click: Maximize
+	Mouse 2 4 N abortOnDrag Maximize 100 0 # Middle-Click: Wide
+	Mouse 3 4 N abortOnDrag Maximize 0 100 # Right-Click: Tall
+	
+	# Top Right (Iconify)
+	setButtonIcon 6 "minimize"
+	Mouse 1 6 N abortOnDrag Iconify # Left-Click: Iconify
+	Mouse 3 6 N abortOnDrag WindowShade # Right-Click: Shade
+	
+	# Title (Sticky)
+	Mouse 2 T N Stick # Middle-Click
+	
+	# Title (Replace)
+	Mouse 3 T N PlaceAgain Anim # Right-Click
+	
+	# Window Icon (Window Menu)
+	Mouse 0 1 N Menu windowMenu # Right-Click
+	ButtonStyle 1 MiniIcon
+
+ ##################
+## Window Borders ##
+ ##################
+	# Make resizeable windows have a 3px border
+	Style * HandleWidth 4
+	
+	# Make fixed windows have a 1px border
+	Style * BorderWidth 1
+	
+	# Make Window borders depress when clicked
+	Style * DepressableBorder
+	
+	# Decorate dialogues too
+	Style * DecorateTransient
+	
+	# Make Window Buttons flat
+	ButtonStyle All ActiveUp -- Flat
+	ButtonStyle All Inactive -- Flat
+	
+	# Make Window Titles flat
+	TitleStyle ActiveUp -- Flat
+	TitleStyle Inactive -- Flat
+
+ ##################
+## Urgency Styles ##
+ ##################
+	AddToFunc UrgencyFunc
+		+ I Echo "urgent!"
+		+ I Style ($[w.id]) Color white/red
+	
+	AddToFunc UrgencyDoneFunc
+		+ I Style ($[w.id]) Color
+
+

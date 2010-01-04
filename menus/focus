@@ -1,0 +1,21 @@
+ ########################################################
+##########################################################
+####                                                  ####
+####    Window focusing mode setter                   ####
+####    "YetAnotherLevelUp"  ~(c) 2009                ####
+####                                                  ####
+##########################################################
+ ########################################################
+
+ ########
+## Menu ##
+ ########
+DestroyMenu windowFocusMode
+AddToMenu windowFocusMode "Window Focus Mode" Title
+ + DynamicPopupAction PipeRead "$[YALU]/bin/yaluFocusMode"
+ + "Something went wrong..." -
+ + "" Nop
+ + "" Popup MenuFvwmRoot
+
+PipeRead "$[YALU]/bin/yaluFocusMode"
+

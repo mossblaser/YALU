@@ -1,0 +1,23 @@
+ ########################################################
+##########################################################
+####                                                  ####
+####    Window dropdown menu                          ####
+####    "YetAnotherLevelUp"  ~(c) 2009                ####
+####                                                  ####
+##########################################################
+ ########################################################
+
+ ############
+## Launcher ##
+ ############
+
+AddToFunc addToToolbar
+	+ I *yaluButtons: (Swallow (UseOld, NoHints, NoClose) $[w.resource] Nop)
+
+DestroyMenu windowMenu
+AddToMenu windowMenu
+ + "Clickme!" Current echo $[w.name]
+ + "Toolbar" Pick Exec exec xmessage $[w.class]
+ + "Coming soon..." -
+
+#PipeRead "$[YALU]/bin/yaluMainMenu"

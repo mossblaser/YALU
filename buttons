@@ -1,0 +1,39 @@
+ ########################################################
+##########################################################
+####                                                  ####
+####    Configure Fvwm Pager                          ####
+####    "YetAnotherLevelUp"  ~(c) 2009                ####
+####                                                  ####
+##########################################################
+ ########################################################
+
+ ####################
+## Load FvwmButtons ##
+ ####################
+	DestroyFunc setButtons
+	AddToFunc setButtons
+		+ I KillModule FvwmButtons yaluButtons
+		+ I Module FvwmButtons yaluButtons
+		+ I *yaluButtons: Back black
+		+ I *yaluButtons: Fore white
+		+ I *yaluButtons: BoxSize smart
+		+ I *yaluButtons: Columns
+		+ I *yaluButtons: Rows 1
+		+ I *yaluButtons: Geometry 500x24-0-0
+		+ I *yaluButtons: Frame 0
+		+ I *yaluButtons: (1x1, Swallow "xload"\
+					"Exec exec xload -fg $fg -bg $bg -update 1 -nolabel -geometry -300-300")
+		+ I *yaluButtons: (3x1, Swallow (UseOld, Kill, NoHints) "stalonetray" \
+					"Exec exec stalonetray -bg $bg --no-shrink --icon-gravity W"\
+					Right)
+		+ I *yaluButtons: (1x1, Swallow (UseOld) "xclock" \
+					"Exec exec xclock -digital -brief -bg $bg -fg $fg -norender -padding 0"\
+					Right)
+		+ I Style yaluButtons Sticky,NoHandles,NoTitle,NeverFocus,color grey/black
+	setButtons
+	
+	# Super+Alt+Space To Raise Buttons
+	Key Space A M4 All ("yaluButtons") Raise
+	
+	# Ctl+Super+Alt+Space To Lower Buttons
+	Key Space A CM4 All ("yaluButtons") Lower
