@@ -1,11 +1,16 @@
- ########################################################
-##########################################################
-####                                                  ####
-####    YALU Configuration Options                    ####
-####    "YetAnotherLevelUp"  ~(c) 2009                ####
-####                                                  ####
-##########################################################
- ########################################################
+ ##############################################################################
+################################################################################
+####            YetAnotherLevelUp (YALU), an FVWM Configuration             ####
+####               ~ Jonathan Heathcote                                     ####
+####               ~ September 2009 - Present                               ####
+####               ~ GNU GPLv3                                              ####
+################################################################################
+ ##############################################################################
+#
+# yaluConfig:
+#   User configurable options for yalu. Most of these should be configurable
+#   using the menus so it is reccomended that you use them however it is not
+#   neccesary.
 
 # Text editor to use
 SetEnv yaluEditor "gvim"
@@ -14,7 +19,7 @@ SetEnv yaluEditor "gvim"
 SetEnv yaluTerminal "xterm"
 
 # Web browser to use
-SetEnv yaluBrowser "google-chrome"
+SetEnv yaluBrowser "chromium"
 
 # What list of applications should be shown on the right click menu?
 #  "Recently Used" or "Frequently Used"
@@ -61,3 +66,7 @@ SetEnv yaluDesks "0"
 #  From Bottom-Left: "WarpToWindow 0% 100%"
 #  From Bottom-Right: "WarpToWindow 100% 100%"
 SetEnv yaluResizeCorner "WarpToWindow 100% 100%"
+
+# The delay between a command completing and the options disapearing for
+# yaluDelayExit controlled scripts (seconds)
+SetEnv yaluDelayExitTime 30

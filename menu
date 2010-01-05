@@ -7,3 +7,5 @@ x&lock
 
 &Skype	skype
 &Pidgin	pidgin
+
+&Command Escape Test	xmessage Hello\,\'\ -buttons\'\ \$hi -timeout 4

@@ -1,0 +1,187 @@
+#!/usr/bin/python
+ ##############################################################################
+################################################################################
+####            YetAnotherLevelUp (YALU), an FVWM Configuration             ####
+####               ~ Jonathan Heathcote                                     ####
+####               ~ September 2009 - Present                               ####
+####               ~ GNU GPLv3                                              ####
+################################################################################
+ ##############################################################################
+#
+# yaluMenu:
+#   Generates dynamic menus for YALU and also facilitates setting options in the
+#   config file. Syntax:
+#      yaluMenu show [menu name]
+#   or yaluMenu set [option] [value] | {[scope] [value]}
+
+################################################################################
+# Menu Generation                                                              #
+#   Classes which produce different menus for YALU                             #
+################################################################################
+
+# All Menu objects will be added to this dictionary with their names as the key
+menus = {}
+
+class Menu:
+	def __init__(self, name, header = None, dynamic = False):
+		"""
+		A representation of an FVWM menu.
+		
+		name -- A string which will identify the menu uniquely
+		header -- The string to display at the top of the menu as a heading
+		dynamic -- Make this menu regenerate itself every time it is shown
+		"""
+		# Add this Menu object to the dictionary of all menus
+		global menus
+		menus[name] = self
+		
+		# Store the name of the menu
+		self.name = name
+		
+		# Destroy any previous menus of the same name
+		self.fvwmCode = "DestroyMenu Recreate \"%s\"\n"%(self.name,)
+		
+		# If a header was supplied, add it to the menu
+		if header != None:
+			self.fvwmCode += "AddToMenu %s \"%s\" Title\n"%(self.name,header)
+		
+		# If the menu is dynamic bind the FVWM event to regenerate this menu
+		if dynamic:
+			self.fvwmCode += "AddToMenu %s DynamicPopupAction YaluMenu menu %s\n"%(
+				self.name,
+				self.name
+			)
+	
+	def __str__(self):
+		"""Return the FVWM Config data for this menu"""
+		return self.fvwmCode
+	
+	def append(self, label = None, action = None, icon = None):
+		"""Add a menu item to the menu, or, if nothing specified, a seperator"""
+		# If the icon is present, give it an extension and propper eclosure.
+		if label != None:
+			if icon != None:
+				icon = "%%%s%%"%(icon,)
+			else:
+				icon = ""
+			
+			self.fvwmCode += "AddToMenu %s \"%s%s\" %s\n"%(
+				self.name,
+				icon,
+				label,
+				action
+			)
+		else:
+			self.fvwmCode += "AddToMenu %s \"\" Nop\n"%(self.name, )
+	
+	def appendProgram(self, label, command):
+		"""Add a program to the menu"""
+		
+		# Add a menu item with the specifed label and use the first word of the
+		# command as the icon filename.
+		self.append(label, "YaluExec %s"%(command,), command.partition(" ")[0])
+		
+		# If there is a specified hot key, use that, if not, use the first letter
+		hotkeyPosition = label.find("&") + 1
+		if hotkeyPosition != 0 and hotkeyPosition < len(label):
+			hotkey = label[hotkeyPosition]
+		else:
+			hotkey = label[0]
+		
+		# Set up a keyboard shortcut for the menu entry (Super + Hotkey)
+		self.fvwmCode += "Key %s A 4 YaluExec %s\n"%(hotkey, command)
+		
+
+class MenuLauncher(Menu):
+	def __init__(self, name):
+		"""Create a launcher"""
+		Menu.__init__(self, name, "YetAnotherLevelUp")
+		
+		# Add 'fixed' menu items first
+		self.appendProgram("Terminal", "$[yaluTerminal]")
+		self.appendProgram("Web Browser", "$[yaluBrowser]")
+		self.appendProgram("Editor", "$[yaluEditor]")
+		self.append()
+		
+		# Load user's menu
+		#   Format:
+		#     * Entries seperated by lines
+		#     * Entries can contain an ampersand to indicate a hotkey
+		#     * Entries can be just a command
+		#     * Entries can be a label and command seperated by a tab
+		#     * Spaces can be added with a newline charachter
+		for rawMenuData in open("menu","r").read().split("\n"):
+			if rawMenuData == "":
+				# Blank line: add a seperator
+				self.append()
+			elif rawMenuData.find("\t") != -1:
+				# Tab-separated label and command
+				label, _ , command = rawMenuData.partition("\t")
+				self.appendProgram(label, command)
+			else:
+				# Command/Label are the same -- just strip the ampersands for the cmd
+				label = rawMenuData
+				command = rawMenuData.replace("&","")
+				self.appendProgram(label, command)
+		
+		# Add a quit button
+		self.append("Quit", "Quit", "quit")
+
+class MenuExecOutput(Menu):
+	def __init__(self, name):
+		"""Create Exec Output viewer menu"""
+		Menu.__init__(self, name, "View Program Output")
+		
+		# Add 'fixed' menu items first
+		self.appendProgram("Terminal", "$[yaluTerminal]")
+		self.appendProgram("Web Browser", "$[yaluBrowser]")
+		self.appendProgram("Editor", "$[yaluEditor]")
+		self.append()
+		
+		# Load user's menu
+		#   Format:
+		#     * Entries seperated by lines
+		#     * Entries can contain an ampersand to indicate a hotkey
+		#     * Entries can be just a command
+		#     * Entries can be a label and command seperated by a tab
+		#     * Spaces can be added with a newline charachter
+		for rawMenuData in open("menu","r").read().split("\n"):
+			if rawMenuData == "":
+				# Blank line: add a seperator
+				self.append()
+			elif rawMenuData.find("\t") != -1:
+				# Tab-separated label and command
+				label, _ , command = rawMenuData.partition("\t")
+				self.appendProgram(label, command)
+			else:
+				# Command/Label are the same -- just strip the ampersands for the cmd
+				label = rawMenuData
+				command = rawMenuData.replace("&","")
+				self.appendProgram(label, command)
+		
+		# Add a quit button
+		self.append("Quit", "Quit", "quit")
+	
+
+if __name__ == "__main__":
+	import sys, os
+	# Move into the YALU dir so that all paths from now on can be relative
+	os.chdir(os.environ["YALU"])
+	
+	# Create a test menu
+	test = Menu("test", "A Test Menu", True)
+	test.append("Test Element","Nop", "xterm")
+	
+	# Create a launcher
+	MenuLauncher("launcher")
+	
+	sys.argv[0] = os.path.basename(sys.argv[0])
+	if sys.argv[0] == "yaluMenu":
+		if len(sys.argv) == 2:
+			# Print the menu item specified as the second argument
+			print menus[sys.argv[1]]
+		else:
+			for menu in menus:
+				print menus[menu]
+	else:
+		sys.stderr.write("ERROR: What command is this?\n")

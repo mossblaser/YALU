@@ -14,10 +14,11 @@ else
 			cat "$YALU/logs/history" | tac | uniq | head -n 15
 		elif [ "$yaluRecentType" == "Frequently Used" ]; then
 			tail -n 100 "$YALU/logs/history" | sort | uniq -c | sort -nr \
-				| sed -re "s/[[:space:]]*[[:digit:]]+ (.*)/\1/"
+				| sed -re "s/[[:space:]]*[[:digit:]]+ (.*)/\1/" \
+				| sed -re "s/\\\\/\\\\\\\\/g"
 		fi
 	) | while read line; do
-		echo "AddToMenu yaluRecentApp \"%\$[yaluRunButton]%$line\" Exec exec \$[YALU]/bin/yaluAppRun $line"
+		echo "AddToMenu yaluRecentApp \"%\$[yaluRunButton]%${line//\\/\\\\}\" Exec exec \$[YALU]/bin/yaluAppRun $line"
 	done
 fi
 

@@ -1,0 +1,33 @@
+#!/bin/bash
+echo -n "Command: "
+(for line in "$@"; do
+	printf "%q " "$line" | tr "\n" " "
+done; echo)
+echo -n "Started: "
+date
+echo "****************************************"
+
+if [ ! -n "$yaluDelayExitTime" -o "$yaluDelayExitTime" == "0" ]; then
+	"$@"
+else
+	while true; do
+		set -a
+		"$@"
+		exitStatus="$?"
+		echo "$test"
+		echo "****************************************"
+		echo "Exit status: $exitStatus."
+		echo "Finished: `date`"
+		echo "****************************************"
+		echo "Will close in $yaluDelayExitTime seconds."
+		echo "   [R] to run the command again."
+		echo "   [S] to take over the shell"
+		echo "   Any other key to exit."
+		read -n1 -s -p "" -t $yaluDelayExitTime char
+		case "$char" in
+			r ) echo "******* Running Command Again... *******" ;;
+			s ) exec /bin/bash ;;
+			* ) exit $exitStatus ;;
+		esac
+	done
+fi

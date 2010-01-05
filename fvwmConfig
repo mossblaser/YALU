@@ -1,7 +1,11 @@
-# YetAnotherLevelUp (YALU), an FVWM Configuration
-#   ~ Jonathan Heathcote
-#   ~ September 2009 - Present
-#   ~ GNU GPLv3
+ ##############################################################################
+################################################################################
+####            YetAnotherLevelUp (YALU), an FVWM Configuration             ####
+####               ~ Jonathan Heathcote                                     ####
+####               ~ September 2009 - Present                               ####
+####               ~ GNU GPLv3                                              ####
+################################################################################
+ ##############################################################################
 #
 # fvwmConfig:
 #   The main FVWM configuration file. Make FVWM load this config file to start
@@ -20,6 +24,9 @@
 
 ### Load user configuration ###
 	Read "$[YALU]/yaluConfig"
+
+### Set the path for icons ###
+	ImagePath $[YALU]/images/$[yaluTheme];.$[yaluImageType]:+
 
 ################################################################################
 # Utility Functions                                                            #
@@ -104,6 +111,16 @@
 		+ I	AnimatedMove w 0 Warp
 	AddToFunc throwDown
 		+ I	AnimatedMove w -0 Warp
+	
+	### An alias to run the yaluMenu external command ###
+	DestroyFunc YaluMenu
+	AddToFunc YaluMenu
+		+ I PipeRead "$[YALU]/bin/yaluMenu $*"
+	
+	### Like Exec except this command uses a script which keeps hold of the output
+	DestroyFunc YaluExec
+	AddToFunc YaluExec
+		+ I Exec exec "$[YALU]/bin/yaluExec" $*
 
 ### Load the list of icons ###
 	Read "$[YALU]/icons"
@@ -211,13 +228,9 @@
 # Menus                                                                        #
 #   Define each of the different menus that can be used.                       #
 ################################################################################
+	
 	### Launcher ###
-	DestroyMenu launcher
-	AddToMenu launcher "Launch" Title
-	 + "Something went wrong..." -
-	 + "" Nop
-	 + "" Popup MenuFvwmRoot
-	PipeRead "$[YALU]/bin/yaluMainMenu"
+	YaluMenu launcher
 	
 	AddToFunc yaluApplyMenus
 	 + I Mouse 1 R N Menu launcher # Middle-click desktop
