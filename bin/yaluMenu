@@ -17,6 +17,96 @@
 import sys, os, commands, re
 
 ################################################################################
+# Configuration Management                                                     #
+#   A class which wraps the various config methods used to store yalu settings #
+################################################################################
+# An option object -- on its own it does nothing
+class Option:
+	def __init__(self, config, default = ""):
+		self.config = config
+		self.default = default
+	
+	def getDefault(self):
+		return self.default
+
+# An option that configures an environment variable
+class OptionEnvVar(Option):
+	def __init__(self, variableName, *args, **params):
+		Option.__init__(self, *args, **params)
+		self.variableName = variableName
+	
+	def set(self, value):
+		return self.config.setEnv(self.variableName, value)
+	
+	def get(self):
+		return self.config.getEnv(self.variableName)
+
+class Config:
+	def __init__(self):
+		# A dictionary of option objects for all configurable objects
+		self.options = {
+			"terminal": OptionEnvVar("yaluTerminal", self, "xterm")
+		}
+		
+		# A variable that will store the config file (if it is loaded) in the form
+		# of a list of lines in the file
+		self.oldConfigFile = None
+		self.config = None
+	
+	def __loadConfigFile(self):
+		# Load the config file if neccesary
+		if self.config == None:
+			self.oldConfigFile = open("yaluConfig", "r").read()
+			self.config = self.oldConfigFile.split("\n")
+	
+	def commit(self):
+		# If the config file has been read...
+		if self.config != None:
+			# If the config has changed, save it
+			currentConfigFile = "\n".join(self.config)
+			if currentConfigFile != self.oldConfigFile:
+				open("yaluConfig", "w").write(currentConfigFile)
+	
+	def setEnv(self, variableName, value):
+		"""
+		Set an environment variable both on the terminal, in the config file and
+		print out an Fvwm command to set it
+		"""
+		self.__loadConfigFile()
+		
+		# The new line to be placed in the config file
+		newConfigLine = "SetEnv %s \"%s\""%(variableName, value)
+		
+		# Monitor if a replacement has been made in the file
+		replacementMade = False
+		
+		# Check each line of the file for the matching envvar and update it
+		regex = "\s*SetEnv\s+%s.*"%(variableName,)
+		for lineNumber, line in enumerate(self.config):
+			match = re.match(regex, line, re.IGNORECASE)
+			if match:
+				self.config[lineNumber] = newConfigLine
+				replacementMade = True
+		
+		# If no matches were found, add a replacement to the end along with a
+		# comment
+		if not replacementMade:
+			self.config.append("# Added by yaluConfig")
+			self.config.append(newConfigLine)
+		
+		# Set env variable for this terminal
+		os.environ[variableName] = value
+		
+		# Return Fvwm command to set variable
+		return newConfigLine
+	
+	def getEnv(self, variableName):
+		try:
+			return os.environ[variableName]
+		except KeyError:
+			return ""
+
+################################################################################
 # Menu Generation                                                              #
 #   Classes which produce different menus for YALU                             #
 ################################################################################
@@ -231,6 +321,8 @@ if __name__ == "__main__":
 	test = Menu("test", "A Test Menu", True)
 	test.append("Test Element","Nop", "xterm")
 	
+	config = Config()
+	
 	# Create a launcher
 	MenuLauncher("launcher", "YetAnotherLevelUp", True)
 	
@@ -249,5 +341,20 @@ if __name__ == "__main__":
 		else:
 			for menu in menus:
 				print menus[menu]
+	elif sys.argv[0] == "yaluConfig":
+		if len(sys.argv) == 2:
+			# Just print the property
+			option = config.options[sys.argv[1]]
+			print "%s (Default: %s)"%(option.get(), option.getDefault())
+		elif len(sys.argv) == 3:
+			# Set the config value
+			print config.options[sys.argv[1]].set(sys.argv[2])
+		else:
+			print "The following options are available:"
+			for option in config.options:
+				print option
 	else:
 		sys.stderr.write("ERROR: What command is this?\n")
+	
+	# Commit the options
+	config.commit()
