@@ -232,7 +232,7 @@ if __name__ == "__main__":
 	test.append("Test Element","Nop", "xterm")
 	
 	# Create a launcher
-	MenuLauncher("launcher", "YetAnotherLevelUp", False)
+	MenuLauncher("launcher", "YetAnotherLevelUp", True)
 	
 	# Create an ExecOutput viewer
 	MenuExecOutput("execOutput", "View Command Output", True)

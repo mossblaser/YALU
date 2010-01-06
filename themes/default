@@ -60,7 +60,8 @@
 	Mouse 3 T N PlaceAgain Anim # Right-Click
 	
 	# Window Icon (Window Menu)
-	Mouse 0 1 N Menu windowMenu # Right-Click
+	Mouse 0 1 N Menu windowMenu
+	Key F1 A M Menu windowMenu
 	ButtonStyle 1 MiniIcon
 
  ##################

@@ -25,10 +25,6 @@ SetEnv yaluBrowser "chromium"
 #  "recent" or "frequent"
 SetEnv yaluExecHistoryType "frequent"
 
-# DEPRECIATED!
-#  "Recently Used" or "Frequently Used"
-SetEnv yaluRecentType "Frequently Used"
-
 # YALU Theme
 SetEnv yaluTheme "default"
 

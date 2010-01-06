@@ -46,6 +46,11 @@
 		+ I AddButtonStyle $0 ActiveDown Pixmap "$[YALU]/images/$[yaluTheme]/$1Button.$[yaluImageType]" -- Flat
 		+ I AddButtonStyle $0 Inactive Pixmap "$[YALU]/images/$[yaluTheme]/$1ButtonGrey.$[yaluImageType]" -- Flat
 
+	# Calls up whatever menu editing facilities are available for the launcher
+	DestroyFunc editLauncher
+	AddToFunc editLauncher
+		+ I YaluExec $[yaluEditor] "$[YALU]/menu"
+
 	# Function which will Only carry out an action if clicked (not dragged)
 	DestroyFunc abortOnDrag
 	AddToFunc abortOnDrag
@@ -231,8 +236,11 @@
 #   Define each of the different menus that can be used.                       #
 ################################################################################
 	
+	### Generate all dynamic menus ###
+	YaluMenu
+	
 	### Launcher ###
-	YaluMenu launcher
+	#YaluMenu launcher
 	
 	AddToFunc yaluApplyMenus
 	 + I Mouse 1 R N Menu launcher # Middle-click desktop
@@ -242,19 +250,72 @@
 	 + I Key Space A 4 Exec exec "$[YALU]/bin/yaluDmenu" # Super+Space show dmenu
 	
 	### YaluExec output viewer menu ###
-	YaluMenu execOutput
+	#YaluMenu execOutput
 	
 	AddToFunc yaluApplyMenus
 		+ I Mouse 3 R M Menu execOutput # Alt+Right-click desktop
 		+ I Key F4 A 4 Menu execOutput # Super+F4 everywhere else
 	
 	### Application History List ###
-	yaluMenu execHistory
+	#yaluMenu execHistory
 	
 	AddToFunc yaluApplyMenus
 		+ I Mouse 3 R N Menu execHistory # Right-click desktop
 		+ I Key F3 A 4 Menu execHistory # Super+F3 everywhere else
-
+	
+	### YALU Configuration Menu ###
+	DestroyMenu yaluConfiguration
+	AddToMenu yaluConfiguration "YALU Configuration" Title
+		+ "&Programs" Popup programs
+		+ "&Windows" Popup windows
+		+ "Paging and &Desks" Popup pagingAndDesks
+		+ "&Themes" Popup themes
+		+ "" Nop
+		+ "%fvwm%&FVWM Menu" Popup MenuFvwmRoot
+		+ "" Nop
+		+ "%restart%&Restart" Restart
+		+ "%quit%&Quit" Quit
+	
+	AddToFunc yaluApplyMenus
+		+ I Mouse 2 R N Menu yaluConfiguration # Middle-click desktop
+		+ I Key F2 A 4 Menu yaluConfiguration # Super+F2 everywhere else
+	
+	### Programs (Config) Menu ###
+	DestroyFunc generatePrograms
+	AddToFunc generatePrograms
+	 + I DestroyMenu programs
+	 + I AddToMenu programs
+	 + I	+ DynamicPopupAction generatePrograms
+	 + I 	+ "View Program &Output (Super+F4)" Popup execOutput
+	 + I 	+ "" Nop
+	 + I 	+ "Edit &Launcher" editLauncher
+	 + I 	+ "Change &Terminal Program [$[yaluTerminal]]" editLauncher
+	generatePrograms
+	
+	### YALU Configuration Menu ###
+	#DestroyMenu yaluConfig
+	#AddToMenu yaluConfig "YALU Configuration" Title
+	#	+ "&Window Placement Mode" Popup windowPlaceMode
+	#	+ "Window Focus &Mode" Popup windowFocusMode
+	#	+ "Window &Snapping Distance" Popup windowSnapConfig
+	#	+ "" Nop
+	#	+ "Alt-Resize Corner" Popup altResizeConfig
+	#	+ "" Nop
+	#	+ "Desks and Pages" Popup deskConfig
+	#	+ "" Nop
+	#	+ "Edit Launcher" Exec exec $[yaluEditor] "$[YALU]/menu"
+	#	+ "Command Output" Popup yaluAppOutput
+	#	+ "Program &History order" Popup yaluRecentAppConfig
+	#	+ "%$[yaluDeleteButton]%&Clear Program History" clearHistory
+	#	+ "" Nop
+	#	+ "%fvwm%&FVWM Menu" Popup MenuFvwmRoot
+	#AddToFunc yaluApplyMenus
+	#	+ I Mouse 2 R N Menu yaluConfig # Middle-click desktop
+	#	+ I Key Escape A M Menu yaluConfig # Alt+F1 everywhere else
+	#PipeRead "$[YALU]/bin/yaluSnapConfig"
+	#PipeRead "$[YALU]/bin/yaluAltResizeConfig"
+	
+	
 	### Application History Configuration Menu ###
 	DestroyMenu yaluRecentAppConfig
 	AddToMenu yaluRecentAppConfig
@@ -264,11 +325,26 @@
 	
 	
 	### Window Menu ###
-	DestroyMenu windowMenu
-	AddToMenu windowMenu
-	 + "Clickme!" Current echo $[w.name]
-	 + "Toolbar" Pick Exec exec xmessage $[w.class]
-	 + "Coming soon..." -
+	DestroyFunc buildWindowMenu
+	AddToFunc buildWindowMenu
+		+ I DestroyMenu windowMenu
+		+ I AddToMenu windowMenu
+		+ I 	+ DynamicPopupAction buildWindowMenu
+		+ I 	+ "$[w.name]" Title
+		+ I 	+ "Window Name: $[w.name] ($[w.iconname])" Nop
+		+ I 	+ "Window Class: $[w.class]" Nop
+		+ I 	+ "Window ID: $[w.id]" Nop
+		+ I 	+ "Window Resource: $[w.resource]" Nop
+		+ I 	+ "" Nop
+		+ I 	+ "Window Coordinates: $[w.x], $[w.y]" Nop
+		+ I 	+ "Window Size: $[w.width]x$[w.height]" Nop
+		+ I 	+ "" Nop
+		+ I 	+ "Current Page: $[page.nx], $[page.ny]" Nop
+		+ I 	+ "Current Desk: $[desk.n]" Nop
+		+ I 	+ "" Nop
+		+ I 	+ "Useful Things Coming soon..." -
+	
+	buildWindowMenu
 	
 	### Focus Mode Configuration Menu ###
 	DestroyMenu windowFocusMode
@@ -299,30 +375,6 @@
 	 + "Vertical Screen Edge Jump Size" Popup edgeJumpHeightConfig
 	 + "Edge Jump Delay" Popup edgeResistDelayConfig
 	PipeRead "$[YALU]/bin/yaluDeskConfig all"
-	
-	
-	### Main Configuration Menu ###
-	DestroyMenu yaluConfig
-	AddToMenu yaluConfig "YALU Configuration" Title
-		+ "&Window Placement Mode" Popup windowPlaceMode
-		+ "Window Focus &Mode" Popup windowFocusMode
-		+ "Window &Snapping Distance" Popup windowSnapConfig
-		+ "" Nop
-		+ "Alt-Resize Corner" Popup altResizeConfig
-		+ "" Nop
-		+ "Desks and Pages" Popup deskConfig
-		+ "" Nop
-		+ "Edit Launcher" Exec exec $[yaluEditor] "$[YALU]/menu"
-		+ "Command Output" Popup yaluAppOutput
-		+ "Program &History order" Popup yaluRecentAppConfig
-		+ "%$[yaluDeleteButton]%&Clear Program History" clearHistory
-		+ "" Nop
-		+ "&FVWM Menu%$[yaluFvwmLogo]%" Popup MenuFvwmRoot
-	AddToFunc yaluApplyMenus
-		+ I Mouse 2 R N Menu yaluConfig # Middle-click desktop
-		+ I Key Escape A M Menu yaluConfig # Alt+F1 everywhere else
-	PipeRead "$[YALU]/bin/yaluSnapConfig"
-	PipeRead "$[YALU]/bin/yaluAltResizeConfig"
 	
 	### Link menus to shortcuts on startup ###
 	AddToFunc StartFunction
