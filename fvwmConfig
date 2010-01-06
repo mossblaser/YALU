@@ -234,7 +234,14 @@
 	
 	AddToFunc yaluApplyMenus
 	 + I Mouse 1 R N Menu launcher # Middle-click desktop
-	 + I Key F1 A M Menu launcher # Alt+F1 everywhere else
+	 + I Key F1 A 4 Menu launcher # Super+F1 everywhere else
+	
+	### YaluExec output viewer menu ###
+	YaluMenu execOutput
+	
+	AddToFunc yaluApplyMenus
+		+ I Mouse 3 R M Menu execOutput # Alt+Right-click desktop
+		+ I Key F4 A 4 Menu execOutput # Super+F4 everywhere else
 	
 	### Application History List ###
 	AddToMenu yaluRecentApp "Oops! Something went wrong with yaluMenuHistory" Title
@@ -250,12 +257,6 @@
 		+ "&Recently Used" PipeRead '$[YALU]/bin/yaluConfig yaluRecentType "Recently Used"'
 		+ "&Frequently Used" PipeRead '$[YALU]/bin/yaluConfig yaluRecentType "Frequently Used"'
 	
-	### Application output viewer menu ###
-	AddToMenu yaluAppOutput "Oops! Something went wrong!" Title
-		+ DynamicPopupAction PipeRead "$[YALU]/bin/yaluAppOutput"
-	
-	AddToFunc yaluApplyMenus
-		+ I Mouse 3 R M Menu yaluAppOutput # Alt+Right-click desktop
 	
 	### Window Menu ###
 	DestroyMenu windowMenu

@@ -14,6 +14,8 @@
 #      yaluMenu show [menu name]
 #   or yaluMenu set [option] [value] | {[scope] [value]}
 
+import sys, os, commands, re
+
 ################################################################################
 # Menu Generation                                                              #
 #   Classes which produce different menus for YALU                             #
@@ -130,41 +132,31 @@ class MenuLauncher(Menu):
 class MenuExecOutput(Menu):
 	def __init__(self, name):
 		"""Create Exec Output viewer menu"""
-		Menu.__init__(self, name, "View Program Output")
+		Menu.__init__(self, name, "View Program Output", True)
 		
-		# Add 'fixed' menu items first
-		self.appendProgram("Terminal", "$[yaluTerminal]")
-		self.appendProgram("Web Browser", "$[yaluBrowser]")
-		self.appendProgram("Editor", "$[yaluEditor]")
-		self.append()
+		# A list of screen sessions started by yalu
+		sessions = []
 		
-		# Load user's menu
-		#   Format:
-		#     * Entries seperated by lines
-		#     * Entries can contain an ampersand to indicate a hotkey
-		#     * Entries can be just a command
-		#     * Entries can be a label and command seperated by a tab
-		#     * Spaces can be added with a newline charachter
-		for rawMenuData in open("menu","r").read().split("\n"):
-			if rawMenuData == "":
-				# Blank line: add a seperator
-				self.append()
-			elif rawMenuData.find("\t") != -1:
-				# Tab-separated label and command
-				label, _ , command = rawMenuData.partition("\t")
-				self.appendProgram(label, command)
-			else:
-				# Command/Label are the same -- just strip the ampersands for the cmd
-				label = rawMenuData
-				command = rawMenuData.replace("&","")
-				self.appendProgram(label, command)
+		# Get a list of all screen sessions started by yalu
+		for line in commands.getoutput("screen -ls").split("\n"):
+			regex = r"\s*\d+[.]yalu_(\d+_\w+)"
+			match = re.match(regex, line)
+			if match:
+				sessions.append(match.group(1))
 		
-		# Add a quit button
-		self.append("Quit", "Quit", "quit")
-	
+		sessions.sort()
+		
+		# Add each session to the menu
+		for session in sessions:
+			pid, _ , name = session.partition("_")
+			self.append(
+				"%s (%s)"%(name, pid),
+				"Exec exec $[yaluTerminal] -e \"screen -rx 'yalu_%s'\""%(session,),
+				name
+			)
+		
 
 if __name__ == "__main__":
-	import sys, os
 	# Move into the YALU dir so that all paths from now on can be relative
 	os.chdir(os.environ["YALU"])
 	
@@ -174,6 +166,10 @@ if __name__ == "__main__":
 	
 	# Create a launcher
 	MenuLauncher("launcher")
+	
+	# Create an ExecOutput viewer
+	MenuExecOutput("execOutput")
+	
 	
 	sys.argv[0] = os.path.basename(sys.argv[0])
 	if sys.argv[0] == "yaluMenu":

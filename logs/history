@@ -55,3 +55,9 @@ nautilus --no-desktop
 xterm 
 xterm 
 xterm 
+xterm 
+xterm 
+xterm 
+xclock 
+nautilus --no-desktop 
+xterm 
