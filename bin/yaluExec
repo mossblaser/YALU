@@ -3,6 +3,6 @@
 
 (for line in "$@"; do
 	printf "%q " "$line" | tr "\n" " "
-done; echo) >> "$YALU/logs/history"
+done; echo) >> "$YALU/yaluExec_history"
 
 screen -d -m -S "yalu_$$_$1" "$YALU/bin/yaluDelayExit" "$@"

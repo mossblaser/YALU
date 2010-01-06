@@ -22,6 +22,10 @@ SetEnv yaluTerminal "xterm"
 SetEnv yaluBrowser "chromium"
 
 # What list of applications should be shown on the right click menu?
+#  "recent" or "frequent"
+SetEnv yaluExecHistoryType "frequent"
+
+# DEPRECIATED!
 #  "Recently Used" or "Frequently Used"
 SetEnv yaluRecentType "Frequently Used"
 

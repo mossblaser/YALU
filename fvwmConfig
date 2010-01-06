@@ -32,6 +32,8 @@
 # Utility Functions                                                            #
 #   Various useful functions used in YALU                                      #
 ################################################################################
+	
+	### Clear the application history list ###
 	DestroyFunc clearHistory
 	AddToFunc clearHistory
 		+ I Exec echo -n > "$[YALU]/logs/history"
@@ -236,6 +238,9 @@
 	 + I Mouse 1 R N Menu launcher # Middle-click desktop
 	 + I Key F1 A 4 Menu launcher # Super+F1 everywhere else
 	
+	### Dmenu ###
+	 + I Key Space A 4 Exec exec "$[YALU]/bin/yaluDmenu" # Super+Space show dmenu
+	
 	### YaluExec output viewer menu ###
 	YaluMenu execOutput
 	
@@ -244,11 +249,11 @@
 		+ I Key F4 A 4 Menu execOutput # Super+F4 everywhere else
 	
 	### Application History List ###
-	AddToMenu yaluRecentApp "Oops! Something went wrong with yaluMenuHistory" Title
-		+ DynamicPopupAction PipeRead "$[YALU]/bin/yaluMenuAppHistory"
+	yaluMenu execHistory
 	
 	AddToFunc yaluApplyMenus
-		+ I Mouse 3 R N Menu yaluRecentApp # Right-click desktop
+		+ I Mouse 3 R N Menu execHistory # Right-click desktop
+		+ I Key F3 A 4 Menu execHistory # Super+F3 everywhere else
 
 	### Application History Configuration Menu ###
 	DestroyMenu yaluRecentAppConfig

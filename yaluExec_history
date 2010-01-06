@@ -1,0 +1,19 @@
+xterm 
+xmessage Hello\,\'\ -buttons\'\ \$hi -timeout 4 
+xclock 
+xmessage Hello\,\'\ -buttons\'\ \$hi -timeout 4 
+nautilus --no-desktop 
+nautilus --no-desktop 
+xterm 
+nautilus --no-desktop 
+xmessage Hello\,\'\ -buttons\'\ \$hi -timeout 4 
+xmessage Hello\,\'\ -buttons\'\ \$hi -timeout 4 
+xmessage Hello\,\'\ -buttons\'\ \$hi -timeout 4 
+xmessage Hello\,\'\ -buttons\'\ \$hi -timeout 4 
+inkscape 
+xmessage Hello\,\'\ -buttons\'\ \$hi -timeout 4 
+xterm 
+nautilus --no-desktop 
+
+
+xterm 

@@ -37,6 +37,9 @@ class Menu:
 		global menus
 		menus[name] = self
 		
+		# Prevent changes once the menu has been rendered once
+		self.locked = False
+		
 		# Store the name of the menu
 		self.name = name
 		
@@ -56,53 +59,53 @@ class Menu:
 	
 	def __str__(self):
 		"""Return the FVWM Config data for this menu"""
+		self.locked = True
 		return self.fvwmCode
 	
 	def append(self, label = None, action = None, icon = None):
 		"""Add a menu item to the menu, or, if nothing specified, a seperator"""
 		# If the icon is present, give it an extension and propper eclosure.
-		if label != None:
-			if icon != None:
-				icon = "%%%s%%"%(icon,)
+		if not self.locked:
+			if label != None:
+				if icon != None:
+					icon = "%%%s%%"%(icon,)
+				else:
+					icon = ""
+				
+				self.fvwmCode += "AddToMenu %s \"%s%s\" %s\n"%(
+					self.name,
+					icon,
+					label.replace("\\","\\\\"),
+					action
+				)
 			else:
-				icon = ""
-			
-			self.fvwmCode += "AddToMenu %s \"%s%s\" %s\n"%(
-				self.name,
-				icon,
-				label,
-				action
-			)
+				self.fvwmCode += "AddToMenu %s \"\" Nop\n"%(self.name, )
 		else:
-			self.fvwmCode += "AddToMenu %s \"\" Nop\n"%(self.name, )
+			raise Exception("Menu has been locked!")
 	
-	def appendProgram(self, label, command):
+	def appendProgram(self, label, command, bindHotkey=True):
 		"""Add a program to the menu"""
 		
 		# Add a menu item with the specifed label and use the first word of the
 		# command as the icon filename.
 		self.append(label, "YaluExec %s"%(command,), command.partition(" ")[0])
 		
-		# If there is a specified hot key, use that, if not, use the first letter
-		hotkeyPosition = label.find("&") + 1
-		if hotkeyPosition != 0 and hotkeyPosition < len(label):
-			hotkey = label[hotkeyPosition]
-		else:
-			hotkey = label[0]
-		
-		# Set up a keyboard shortcut for the menu entry (Super + Hotkey)
-		self.fvwmCode += "Key %s A 4 YaluExec %s\n"%(hotkey, command)
-		
+		if bindHotkey:
+			# If there is a specified hot key, use that
+			hotkeyPosition = label.find("&") + 1
+			if hotkeyPosition != 0 and hotkeyPosition < len(label):
+				hotkey = label[hotkeyPosition]
+				
+				# Set up a keyboard shortcut for the menu entry (Super + Hotkey)
+				self.fvwmCode += "Key %s A 4 YaluExec %s\n"%(hotkey, command)
 
 class MenuLauncher(Menu):
-	def __init__(self, name):
+	def __str__(self):
 		"""Create a launcher"""
-		Menu.__init__(self, name, "YetAnotherLevelUp")
-		
 		# Add 'fixed' menu items first
-		self.appendProgram("Terminal", "$[yaluTerminal]")
-		self.appendProgram("Web Browser", "$[yaluBrowser]")
-		self.appendProgram("Editor", "$[yaluEditor]")
+		self.appendProgram("&Terminal", "$[yaluTerminal]")
+		self.appendProgram("&Web Browser", "$[yaluBrowser]")
+		self.appendProgram("&Editor", "$[yaluEditor]")
 		self.append()
 		
 		# Load user's menu
@@ -128,18 +131,17 @@ class MenuLauncher(Menu):
 		
 		# Add a quit button
 		self.append("Quit", "Quit", "quit")
+		return Menu.__str__(self)
 
 class MenuExecOutput(Menu):
-	def __init__(self, name):
+	def __str__(self):
 		"""Create Exec Output viewer menu"""
-		Menu.__init__(self, name, "View Program Output", True)
-		
 		# A list of screen sessions started by yalu
 		sessions = []
 		
 		# Get a list of all screen sessions started by yalu
 		for line in commands.getoutput("screen -ls").split("\n"):
-			regex = r"\s*\d+[.]yalu_(\d+_\w+)"
+			regex = r"\s*\d+[.]yalu_(\d+_\S+)"
 			match = re.match(regex, line)
 			if match:
 				sessions.append(match.group(1))
@@ -154,7 +156,72 @@ class MenuExecOutput(Menu):
 				"Exec exec $[yaluTerminal] -e \"screen -rx 'yalu_%s'\""%(session,),
 				name
 			)
+		return Menu.__str__(self)
+
+class MenuExecHistory(Menu):
+	def __str__(self):
+		"""Create a menu with recently/frequently used programs"""
+		# Load the program history
+		rawExecHistory = open("yaluExec_history", "r").read()
 		
+		# Strip out blank lines
+		execHistory = []
+		for line in rawExecHistory.split("\n"):
+			if line.strip() != "":
+				execHistory.append(line)
+		
+		if os.environ["yaluExecHistoryType"] == "recent":
+			# Add appropriate title
+			self.append("Recently Used Commands","Title")
+			
+			# Strip out contiguous repeats
+			recentExecHistory = []
+			lastItem = ""
+			for item in execHistory:
+				if item != lastItem:
+					recentExecHistory.append(item)
+					lastItem = item
+			
+			# Add the most recent 15 items to the menu
+			self.appendTopEntries(recentExecHistory, 15)
+		elif os.environ["yaluExecHistoryType"] == "frequent":
+			# Add the title
+			self.append("Frequently Used Commands","Title")
+			
+			# Only look at the most recent 100 entries
+			recentExecHistory = self.__limitLast(execHistory, 100)
+			
+			# Count occurences
+			execFrequency = [
+				(x, recentExecHistory.count(x)) for x in set(recentExecHistory)
+			]
+			
+			# Sort by occurences
+			frequentExecHistory = sorted(execFrequency, key=lambda x: x[1])
+			
+			# Add them to the menu
+			self.appendTopEntries([x[0] for x in frequentExecHistory], 15)
+		
+		# Add the "clear" option
+		self.append()
+		self.append("Clear History", "clearHistory", "delete")
+		
+		return Menu.__str__(self)
+	
+	def __limitLast(self, listToLimit, limit):
+		limitedList = []
+		for i in range(1,limit + 1):
+			requiredIndex = len(listToLimit) - i
+			if requiredIndex >= 0:
+				limitedList.append(listToLimit[requiredIndex])
+			else:
+				break
+		return limitedList
+	
+	def appendTopEntries(self, entryList, number):
+		entryList = self.__limitLast(entryList, number)
+		for entry in entryList:
+			self.appendProgram(entry, entry, False)
 
 if __name__ == "__main__":
 	# Move into the YALU dir so that all paths from now on can be relative
@@ -165,10 +232,13 @@ if __name__ == "__main__":
 	test.append("Test Element","Nop", "xterm")
 	
 	# Create a launcher
-	MenuLauncher("launcher")
+	MenuLauncher("launcher", "YetAnotherLevelUp", False)
 	
 	# Create an ExecOutput viewer
-	MenuExecOutput("execOutput")
+	MenuExecOutput("execOutput", "View Command Output", True)
+	
+	# Create the exec history menu
+	MenuExecHistory("execHistory", None, True)
 	
 	
 	sys.argv[0] = os.path.basename(sys.argv[0])

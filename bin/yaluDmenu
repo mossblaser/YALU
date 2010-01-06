@@ -11,5 +11,5 @@ function listProgramsInPath {
 	done
 } # function listProgramsInPath
 
-exec $YALU/bin/yaluAppRun $(listProgramsInPath | dmenu -i)
+exec $YALU/bin/yaluExec $(listProgramsInPath | dmenu -i)
 
