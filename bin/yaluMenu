@@ -9,10 +9,11 @@
  ##############################################################################
 #
 # yaluMenu:
-#   Generates dynamic menus for YALU and also facilitates setting options in the
-#   config file. Syntax:
-#      yaluMenu show [menu name]
-#   or yaluMenu set [option] [value] | {[scope] [value]}
+#   Generates dynamic menus for YALU. Syntax:
+#      yaluMenu [menu name]
+# yaluConfig:
+#   Facilitates setting options in the config file. Syntax:
+#      yaluConfig [option] [value] | {[scope] [value]}
 
 import sys, os, commands, re
 
@@ -36,16 +37,45 @@ class OptionEnvVar(Option):
 		self.variableName = variableName
 	
 	def set(self, value):
-		return self.config.setEnv(self.variableName, value)
+		self.config.setEnv(self.variableName, value)
 	
 	def get(self):
 		return self.config.getEnv(self.variableName)
+
+# An option that configures an environment variable that is used to set a style
+class OptionEnvVarStyle(OptionEnvVar):
+	def __init__(self, scope, *args, **params):
+		OptionEnvVar.__init__(self, *args, **params)
+		self.styleScope = scope
+	
+	def set(self, value):
+		OptionEnvVar.set(self, value)
+		# Update style
+		self.config.FvwmCommand("Style %s %s"%(self.styleScope, value))
+
+# An option that configures an environment variable and then executes a command
+class OptionEnvVarCommand(OptionEnvVar):
+	def __init__(self, command, *args, **params):
+		OptionEnvVar.__init__(self, *args, **params)
+		self.command = command
+	
+	def set(self, value):
+		OptionEnvVar.set(self, value)
+		# Run Command
+		self.config.FvwmCommand(self.command)
 
 class Config:
 	def __init__(self):
 		# A dictionary of option objects for all configurable objects
 		self.options = {
-			"terminal": OptionEnvVar("yaluTerminal", self, "xterm")
+			"terminal": OptionEnvVarCommand("YaluMenu", "yaluTerminal", self, "xterm"),
+			"editor": OptionEnvVarCommand("YaluMenu", "yaluEditor", self, "gvim"),
+			"browser": OptionEnvVarCommand("YaluMenu", "yaluBrowser", self, "firefox"),
+			"execHistoryType": OptionEnvVar("yaluExecHistoryType", self, "frequent"),
+			"placeMode": OptionEnvVarStyle("*", "yaluPlaceMode", self, "MinOverlapPlacement"),
+			"snapDistance": OptionEnvVarCommand("setSnapDistance", "yaluSnapDistance", self, "10"),
+			"focusMode": OptionEnvVarStyle("*", "yaluFocusMode", self, "MouseFocus"),
+			"resizeCorner": OptionEnvVar("yaluResizeCorner", self, "WarpToWindow 100% 100%"),
 		}
 		
 		# A variable that will store the config file (if it is loaded) in the form
@@ -97,8 +127,13 @@ class Config:
 		# Set env variable for this terminal
 		os.environ[variableName] = value
 		
-		# Return Fvwm command to set variable
-		return newConfigLine
+		# Send Fvwm command to set variable
+		self.FvwmCommand(newConfigLine)
+	
+	def FvwmCommand(self, command):
+		command = command.replace("\"","\\\"")
+		commands.getoutput("FvwmCommand \"%s\""%("Echo " + command,))
+		commands.getoutput("FvwmCommand \"%s\""%(command,))
 	
 	def getEnv(self, variableName):
 		try:
@@ -193,9 +228,9 @@ class MenuLauncher(Menu):
 	def __str__(self):
 		"""Create a launcher"""
 		# Add 'fixed' menu items first
-		self.appendProgram("&Terminal", "$[yaluTerminal]")
-		self.appendProgram("&Web Browser", "$[yaluBrowser]")
-		self.appendProgram("&Editor", "$[yaluEditor]")
+		self.appendProgram("&Terminal", os.environ["yaluTerminal"])
+		self.appendProgram("&Web Browser", os.environ["yaluBrowser"])
+		self.appendProgram("&Editor", os.environ["yaluEditor"])
 		self.append()
 		
 		# Load user's menu
@@ -294,7 +329,7 @@ class MenuExecHistory(Menu):
 		
 		# Add the "clear" option
 		self.append()
-		self.append("Clear History", "clearHistory", "delete")
+		self.append("Clear History", "clearExecHistory", "clearHistory")
 		
 		return Menu.__str__(self)
 	
@@ -312,6 +347,34 @@ class MenuExecHistory(Menu):
 		entryList = self.__limitLast(entryList, number)
 		for entry in entryList:
 			self.appendProgram(entry, entry, False)
+
+class MenuRadioButtons(Menu):
+	# The selected radio button
+	selectedValue = ""
+	
+	# A template for the action to be performed on a button press where % is
+	# substituded for the value
+	buttonAction = ""
+	
+	def appendButton(self, label, value=None):
+		if value == None:
+			value = label
+		
+		# Choose an appropriate icon
+		if str(value) == str(self.selectedValue):
+			radioIcon = "radioButtonSel"
+		else:
+			radioIcon = "radioButtonNorm"
+		
+		# Append button to the list
+		self.append(label, self.buttonAction.replace("%", str(value)), radioIcon)
+
+def makeYaluConfigRadioMenu(config, option, *args, **params):
+	menu = MenuRadioButtons(*args, **params)
+	menu.selectedValue = config.options[option].get()
+	menu.buttonAction = "YaluConfig %s \"%%\""%(option,)
+	return menu
+
 
 if __name__ == "__main__":
 	# Move into the YALU dir so that all paths from now on can be relative
@@ -332,6 +395,65 @@ if __name__ == "__main__":
 	# Create the exec history menu
 	MenuExecHistory("execHistory", None, True)
 	
+	# Create the exec history config menu
+	execHistoryConfig = makeYaluConfigRadioMenu(
+		config, "execHistoryType", "execHistoryConfig", None, True
+	)
+	execHistoryConfig.appendButton("Frequently Used", "frequent")
+	execHistoryConfig.appendButton("Recently Used", "recent")
+	
+	# Create the window placement config menu
+	placeModeConfig = makeYaluConfigRadioMenu(
+		config, "placeMode", "placeModeConfig", "Window Placement Mode", True
+	)
+	modes = [
+		["Tile if possible, then cascade", "frequent"],
+		["Tile if possible, then cascade", "TileCascadePlacement"],
+		["Tile if possible, then manually place", "TileManualPlacement"],
+		["Place all windows manually", "ManualPlacement"],
+		["Tile with as little overlap as possible", "MinOverlapPlacement"],
+		["Tile with as little % overlap as possible", "MinOverlapPercentPlacement"],
+	]
+	for label, value in modes:
+		placeModeConfig.appendButton(label, value)
+	
+	# Create the window snapping config menu
+	snapDistanceConfig = makeYaluConfigRadioMenu(
+		config, "snapDistance", "snapDistanceConfig", "Window Snapping Distance", True
+	)
+	snapDistanceConfig.appendButton("Disabled", 0)
+	distances = []
+	distances.extend(range(2,6))
+	distances.extend(range(10,26,5))
+	distances.extend(range(50,201,25))
+	for distance in distances:
+		snapDistanceConfig.appendButton("%spx"%(distance,), distance)
+	
+	# Create the focus mode config menu
+	focusModeConfig = makeYaluConfigRadioMenu(
+		config, "focusMode", "focusModeConfig", "Window Focus Mode", True
+	)
+	modes = [
+		["Click To Focus (Windows Style)", "ClickToFocus"],
+		["Focus Follows Mouse (FVWM Style)", "MouseFocus"],
+		["Sloppy Focus (X Style)", "SloppyFocus"],
+	]
+	for label, value in modes:
+		focusModeConfig.appendButton(label, value)
+	
+	# Create the resize corner config menu
+	resizeCornerConfig = makeYaluConfigRadioMenu(
+		config, "resizeCorner", "resizeCornerConfig", "Alt-Resize Windows From...", True
+	)
+	modes = [
+		["Cursor", ""],
+		["Top-Left", "WarpToWindow 0% 0%"],
+		["Top-Right", "WarpToWindow 100% 0%"],
+		["Bottom-Left", "WarpToWindow 0% 100%"],
+		["Bottom-Right", "WarpToWindow 100% 100%"],
+	]
+	for label, value in modes:
+		resizeCornerConfig.appendButton(label, value)
 	
 	sys.argv[0] = os.path.basename(sys.argv[0])
 	if sys.argv[0] == "yaluMenu":
@@ -345,10 +467,10 @@ if __name__ == "__main__":
 		if len(sys.argv) == 2:
 			# Just print the property
 			option = config.options[sys.argv[1]]
-			print "%s (Default: %s)"%(option.get(), option.getDefault())
+			print "%s\nDefault: %s"%(option.get(), option.getDefault())
 		elif len(sys.argv) == 3:
 			# Set the config value
-			print config.options[sys.argv[1]].set(sys.argv[2])
+			config.options[sys.argv[1]].set(sys.argv[2])
 		else:
 			print "The following options are available:"
 			for option in config.options:

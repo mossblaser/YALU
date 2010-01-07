@@ -1,0 +1,26 @@
+#!/bin/bash
+ ##############################################################################
+################################################################################
+####            YetAnotherLevelUp (YALU), an FVWM Configuration             ####
+####               ~ Jonathan Heathcote                                     ####
+####               ~ September 2009 - Present                               ####
+####               ~ GNU GPLv3                                              ####
+################################################################################
+ ##############################################################################
+#
+# yaluConfigGUI:
+#   Sets an option using yaluConfig based on input from zenity. Syntax:
+#      yaluConfigGUI option prompt
+
+currentConfig="$("$YALU/bin/yaluConfig" "$1")"
+currentValue="$(echo "$currentConfig" | head -n1)"
+default="$(echo "$currentConfig" | tail -n1)"
+
+if newValue="$(zenity \
+	--entry \
+	--title="YetAnotherLevelUp" \
+	--text="$2\n$default" \
+	--entry-text="$currentValue")"; then
+	"$YALU/bin/yaluConfig" "$1" "$newValue"
+fi
+

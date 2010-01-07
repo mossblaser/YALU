@@ -1,39 +1,31 @@
-xterm 
-xmessage Hello\,\'\ -buttons\'\ \$hi -timeout 4 
-xclock 
-xmessage Hello\,\'\ -buttons\'\ \$hi -timeout 4 
-nautilus --no-desktop 
-nautilus --no-desktop 
-xterm 
-nautilus --no-desktop 
-xmessage Hello\,\'\ -buttons\'\ \$hi -timeout 4 
-xmessage Hello\,\'\ -buttons\'\ \$hi -timeout 4 
-xmessage Hello\,\'\ -buttons\'\ \$hi -timeout 4 
-xmessage Hello\,\'\ -buttons\'\ \$hi -timeout 4 
-inkscape 
-xmessage Hello\,\'\ -buttons\'\ \$hi -timeout 4 
-xterm 
-nautilus --no-desktop 
-
-
-xterm 
-gvim 
-chromium 
-xterm 
-xterm 
-chromium 
-chromium 
-skype 
-chromium 
-gvim 
-xterm 
-xterm 
 gvim /home/jonathan/.yalu/menu 
+xterm -r 
+xterm -r 
+xterm -r 
+xterm -r 
+xterm -r 
+xterm -r 
+xterm -r 
+xterm -r 
+xterm -r 
+xterm -r 
+xterm -r 
+xterm -r 
+xterm -r 
+xterm -r 
+xterm -r 
+xterm -r 
+xterm -r 
+xterm -r 
+xterm -r 
+xterm -r 
+xterm -r 
 xterm 
-chromium 
-xterm 
-xterm 
-gnome-terminal 
-xterm 
-xterm 
-xterm 
+xterm -r 
+xterm -r 
+xterm -r 
+xterm -r 
+xterm -r 
+xterm -r 
+xterm -r 
+xterm -r 

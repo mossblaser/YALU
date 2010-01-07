@@ -34,8 +34,8 @@
 ################################################################################
 	
 	### Clear the application history list ###
-	DestroyFunc clearHistory
-	AddToFunc clearHistory
+	DestroyFunc clearExecHistory
+	AddToFunc clearExecHistory
 		+ I Exec echo -n > "$[YALU]/logs/history"
 
 	# Function to set icons for window buttons (setButtonIcon buttonID buttonName
@@ -123,6 +123,16 @@
 	DestroyFunc YaluMenu
 	AddToFunc YaluMenu
 		+ I PipeRead "$[YALU]/bin/yaluMenu $*"
+	
+	### An alias to run the yaluConfig external command ###
+	DestroyFunc YaluConfig
+	AddToFunc YaluConfig
+		+ I Exec exec "$[YALU]/bin/yaluConfig" $*
+	
+	### An alias to run the yaluConfigGUI external command ###
+	DestroyFunc YaluConfigGUI
+	AddToFunc YaluConfigGUI
+		+ I Exec exec "$[YALU]/bin/yaluConfigGUI" $*
 	
 	### Like Exec except this command uses a script which keeps hold of the output
 	DestroyFunc YaluExec
@@ -221,9 +231,12 @@
 	#setEdgeResistDelay # Done by window snapping
 	
 ################################################################################
-# Window Snapping                                                              #
-#   Control the number of pages and desks available to the user.               #
+# Window behaviour                                                             #
+#   Control way windows interact and are placed                                #
 ################################################################################
+	# Placement Mode
+	Style * $[yaluPlaceMode]
+	
 	# Window snapping
 	DestroyFunc setSnapDistance
 	AddToFunc setSnapDistance
@@ -284,13 +297,30 @@
 	DestroyFunc generatePrograms
 	AddToFunc generatePrograms
 	 + I DestroyMenu programs
-	 + I AddToMenu programs
+	 + I AddToMenu programs "Program Configuration" Title
 	 + I	+ DynamicPopupAction generatePrograms
 	 + I 	+ "View Program &Output (Super+F4)" Popup execOutput
 	 + I 	+ "" Nop
 	 + I 	+ "Edit &Launcher" editLauncher
-	 + I 	+ "Change &Terminal Program [$[yaluTerminal]]" editLauncher
+	 + I 	+ "Change &Terminal Program ($[yaluTerminal])" \
+	     	   YaluConfigGUI terminal "Select Terminal for YALU"
+	 + I 	+ "Change Text &Editor ($[yaluEditor])" \
+	     	   YaluConfigGUI editor "Select Text Editor for YALU"
+	 + I 	+ "Change &Web Browser ($[yaluBrowser])" \
+	     	   YaluConfigGUI browser "Select Web Browser for YALU"
+	 + I 	+ "" Nop
+	 + I 	+ "Program Usage &History (Super+F3)" Popup execHistory
+	 + I 	+ "&Sort History By..." Popup execHistoryConfig
+	 + I 	+ "%clearHistory%&Clear History" clearExecHistory
 	generatePrograms
+	
+	### Windows (Config) Menu ###
+	DestroyMenu windows
+	AddToMenu windows "Window Configuration" Title
+		+ "Window Placement" Popup placeModeConfig
+		+ "Window Snapping" Popup snapDistanceConfig
+		+ "Window Focus Mode" Popup focusModeConfig
+		+ "Alt-Resize Corner" Popup resizeCornerConfig
 	
 	### YALU Configuration Menu ###
 	#DestroyMenu yaluConfig
@@ -314,15 +344,6 @@
 	#	+ I Key Escape A M Menu yaluConfig # Alt+F1 everywhere else
 	#PipeRead "$[YALU]/bin/yaluSnapConfig"
 	#PipeRead "$[YALU]/bin/yaluAltResizeConfig"
-	
-	
-	### Application History Configuration Menu ###
-	DestroyMenu yaluRecentAppConfig
-	AddToMenu yaluRecentAppConfig
-		+ DynamicPopupAction PipeRead "$[YALU]/bin/yaluAppHistoryMode"
-		+ "&Recently Used" PipeRead '$[YALU]/bin/yaluConfig yaluRecentType "Recently Used"'
-		+ "&Frequently Used" PipeRead '$[YALU]/bin/yaluConfig yaluRecentType "Frequently Used"'
-	
 	
 	### Window Menu ###
 	DestroyFunc buildWindowMenu
