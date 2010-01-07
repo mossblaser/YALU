@@ -33,6 +33,18 @@
 #   Various useful functions used in YALU                                      #
 ################################################################################
 	
+	### Re-set all desk related settings ###
+	DestroyFunc setDesks
+	AddToFunc setDesks
+		+ I setPagingKeys # Update the limits on keyboard shortcuts
+		+ I setPager # Re-load the pager
+	
+	### Re-set all page related settings ###
+	DestroyFunc setPages
+	AddToFunc setPages
+		+ I setDesktopPages # Update the desktop dimensions
+		+ I setPager # Re-load the pager
+	
 	### Clear the application history list ###
 	DestroyFunc clearExecHistory
 	AddToFunc clearExecHistory
@@ -325,28 +337,17 @@
 		+ "Window Focus Mode" Popup focusModeConfig
 		+ "Alt-Resize Corner" Popup resizeCornerConfig
 	
-	### YALU Configuration Menu ###
-	#DestroyMenu yaluConfig
-	#AddToMenu yaluConfig "YALU Configuration" Title
-	#	+ "&Window Placement Mode" Popup windowPlaceMode
-	#	+ "Window Focus &Mode" Popup windowFocusMode
-	#	+ "Window &Snapping Distance" Popup windowSnapConfig
-	#	+ "" Nop
-	#	+ "Alt-Resize Corner" Popup altResizeConfig
-	#	+ "" Nop
-	#	+ "Desks and Pages" Popup deskConfig
-	#	+ "" Nop
-	#	+ "Edit Launcher" Exec exec $[yaluEditor] "$[YALU]/menu"
-	#	+ "Command Output" Popup yaluAppOutput
-	#	+ "Program &History order" Popup yaluRecentAppConfig
-	#	+ "%$[yaluDeleteButton]%&Clear Program History" clearHistory
-	#	+ "" Nop
-	#	+ "%fvwm%&FVWM Menu" Popup MenuFvwmRoot
-	#AddToFunc yaluApplyMenus
-	#	+ I Mouse 2 R N Menu yaluConfig # Middle-click desktop
-	#	+ I Key Escape A M Menu yaluConfig # Alt+F1 everywhere else
-	#PipeRead "$[YALU]/bin/yaluSnapConfig"
-	#PipeRead "$[YALU]/bin/yaluAltResizeConfig"
+	### Paging/Desk (Config) Menu ###
+	DestroyMenu pagingAndDesks
+	AddToMenu pagingAndDesks "Paging and Desk Configuration" Title
+		+ "Number of Desks" Popup desksConfig
+		+ "" Nop
+		+ "Horizontal Pages Per Desk" Popup deskWidthConfig
+		+ "Vertical Pages Per Desk" Popup deskHeightConfig
+		+ "" Nop
+		+ "Horizontal Screen Edge Jump Size" Popup edgeJumpWidthConfig
+		+ "Vertical Screen Edge Jump Size" Popup edgeJumpHeightConfig
+		+ "Edge Jump Delay" Popup edgeResistDelayConfig
 	
 	### Window Menu ###
 	DestroyFunc buildWindowMenu
@@ -369,36 +370,6 @@
 		+ I 	+ "Useful Things Coming soon..." -
 	
 	buildWindowMenu
-	
-	### Focus Mode Configuration Menu ###
-	DestroyMenu windowFocusMode
-	AddToMenu windowFocusMode "Window Focus Mode" Title
-	 + DynamicPopupAction PipeRead "$[YALU]/bin/yaluFocusMode"
-	 + "Something went wrong..." -
-	 + "" Nop
-	 + "" Popup MenuFvwmRoot
-	PipeRead "$[YALU]/bin/yaluFocusMode"
-	
-	### Placement Mode Configuration Menu ###
-	DestroyMenu windowPlaceMode
-	AddToMenu windowPlaceMode "Window Placement Mode" Title
-	 + DynamicPopupAction PipeRead "$[YALU]/bin/yaluPlaceMode"
-	 + "Something went wrong..." -
-	 + "" Nop
-	 + "" Popup MenuFvwmRoot
-	PipeRead "$[YALU]/bin/yaluPlaceMode"
-	
-	### Desktop/Paging Configuration Menu ###
-	DestroyMenu deskConfig
-	AddToMenu deskConfig "Desks and Pages" Title
-	 + "Number of Desks" Popup desksConfig
-	 + "Horizontal Pages Per Desk" Popup deskWidthConfig
-	 + "Vertical Pages Per Desk" Popup deskHeightConfig
-	 + "" Nop
-	 + "Horizontal Screen Edge Jump Size" Popup edgeJumpWidthConfig
-	 + "Vertical Screen Edge Jump Size" Popup edgeJumpHeightConfig
-	 + "Edge Jump Delay" Popup edgeResistDelayConfig
-	PipeRead "$[YALU]/bin/yaluDeskConfig all"
 	
 	### Link menus to shortcuts on startup ###
 	AddToFunc StartFunction

@@ -76,6 +76,12 @@ class Config:
 			"snapDistance": OptionEnvVarCommand("setSnapDistance", "yaluSnapDistance", self, "10"),
 			"focusMode": OptionEnvVarStyle("*", "yaluFocusMode", self, "MouseFocus"),
 			"resizeCorner": OptionEnvVar("yaluResizeCorner", self, "WarpToWindow 100% 100%"),
+			"desks": OptionEnvVarCommand("setDesks", "yaluDesks", self, "0"),
+			"deskWidth": OptionEnvVarCommand("setPages", "yaluDeskWidth", self, "3"),
+			"deskHeight": OptionEnvVarCommand("setPages", "yaluDeskHeight", self, "2"),
+			"edgeJumpWidth": OptionEnvVarCommand("setEdgeJump", "yaluEdgeJumpWidth", self, "100"),
+			"edgeJumpHeight": OptionEnvVarCommand("setEdgeJump", "yaluEdgeJumpHeight", self, "100"),
+			"edgeResistDelay": OptionEnvVarCommand("setEdgeResistDelay", "yaluEdgeResistDelay", self, "0"),
 		}
 		
 		# A variable that will store the config file (if it is loaded) in the form
@@ -200,7 +206,7 @@ class Menu:
 				self.fvwmCode += "AddToMenu %s \"%s%s\" %s\n"%(
 					self.name,
 					icon,
-					label.replace("\\","\\\\"),
+					str(label).replace("\\","\\\\"),
 					action
 				)
 			else:
@@ -352,6 +358,9 @@ class MenuRadioButtons(Menu):
 	# The selected radio button
 	selectedValue = ""
 	
+	# The default radio button
+	defaultValue = ""
+	
 	# A template for the action to be performed on a button press where % is
 	# substituded for the value
 	buttonAction = ""
@@ -366,12 +375,16 @@ class MenuRadioButtons(Menu):
 		else:
 			radioIcon = "radioButtonNorm"
 		
+		if str(value) == self.defaultValue:
+			label = str(label) + " (Default)"
+		
 		# Append button to the list
 		self.append(label, self.buttonAction.replace("%", str(value)), radioIcon)
 
 def makeYaluConfigRadioMenu(config, option, *args, **params):
 	menu = MenuRadioButtons(*args, **params)
 	menu.selectedValue = config.options[option].get()
+	menu.defaultValue = config.options[option].getDefault()
 	menu.buttonAction = "YaluConfig %s \"%%\""%(option,)
 	return menu
 
@@ -454,6 +467,40 @@ if __name__ == "__main__":
 	]
 	for label, value in modes:
 		resizeCornerConfig.appendButton(label, value)
+	
+	# Create the number-of-desks configuration menu
+	desksConfig = makeYaluConfigRadioMenu(
+		config, "desks", "desksConfig", "Number of Desks", True
+	)
+	for size in range(5):
+		desksConfig.appendButton(size + 1, size)
+	
+	# Create the number-of-pages configuration menus
+	for dimension in ["Width", "Height"]:
+		deskPagesConfig = makeYaluConfigRadioMenu(
+			config, "desk%s"%(dimension,),
+			"desk%sConfig"%(dimension,), None, True
+		)
+		for size in range(1,10):
+			deskPagesConfig.appendButton(size, size)
+	
+	# Create the jump-size configuration menus
+	for dimension in ["Width", "Height"]:
+		deskPagesConfig = makeYaluConfigRadioMenu(
+			config, "edgeJump%s"%(dimension,),
+			"edgeJump%sConfig"%(dimension,), None, True
+		)
+		deskPagesConfig.appendButton("Disabled", 0)
+		for distance in range(10, 101,10):
+			deskPagesConfig.appendButton("%s%%"%(distance,), distance)
+	
+	# Create the jump-delay configuration menu
+	edgeResistDelay = makeYaluConfigRadioMenu(
+		config, "edgeResistDelay", "edgeResistDelayConfig", "Delay by:", True
+	)
+	edgeResistDelay.appendButton("Instant", 0)
+	for size in range(1,10):
+		edgeResistDelay.appendButton("0.%ss"%(size,), size*100)
 	
 	sys.argv[0] = os.path.basename(sys.argv[0])
 	if sys.argv[0] == "yaluMenu":

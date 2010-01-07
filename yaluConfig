@@ -9,8 +9,7 @@
 #
 # yaluConfig:
 #   User configurable options for yalu. Most of these should be configurable
-#   using the menus so it is reccomended that you use them however it is not
-#   neccesary.
+#   using the menus so it is reccomended that you use them.
 
 # Text editor to use
 SetEnv yaluEditor "gvim"
@@ -46,7 +45,7 @@ SetEnv yaluDeskHeight "2"
 SetEnv yaluEdgeJumpWidth "100"
 SetEnv yaluEdgeJumpHeight "100"
 
-# Edge-resistance (for the pages)
+# Edge-resistance for the pages (In ms)
 SetEnv yaluEdgeResistDelay "0"
 
 # Distance for window snapping (or the edge of the screen to resist resize)
