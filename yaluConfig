@@ -33,7 +33,6 @@ SetEnv yaluImageType "png"
 
 # Focus model
 #   (Ensure SetEnv is the same to allow GUI config, nasty hack, I know)
-Style * MouseFocus
 SetEnv yaluFocusMode "MouseFocus"
 
 # Window Placing

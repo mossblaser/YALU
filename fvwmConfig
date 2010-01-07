@@ -237,6 +237,9 @@
 	# Placement Mode
 	Style * $[yaluPlaceMode]
 	
+	# Focus Mode
+	Style * $[yaluFocusMode]
+	
 	# Window snapping
 	DestroyFunc setSnapDistance
 	AddToFunc setSnapDistance
