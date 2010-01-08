@@ -9,7 +9,10 @@
 #
 # yaluConfig:
 #   User configurable options for yalu. Most of these should be configurable
-#   using the menus so it is reccomended that you use them.
+#   using the menus so it is reccomended that you use them. Please note that
+#   while FVWM in general is not case sensitive, the treatment of this file is
+#   so please use "SetEnv" not "setenv" and keep variable names in the correct
+#   casing.
 
 ################################################################################
 # Default Applications                                                         #

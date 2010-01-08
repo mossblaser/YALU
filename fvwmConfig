@@ -46,7 +46,7 @@
 	# Note that here images are limited to a user-specified file type, this means
 	# that if the user's FVWM install doesn't support PNG they can simply choose
 	# to use XPM all the time (or if it does, reap the benefits of smoother icons)
-	ImagePath $[YALU]/images/$[yaluTheme];.$[yaluImageType]:+
+	ImagePath $[YALU]/themes/$[yaluTheme]/icons;.$[yaluImageType]:$[YALU]/icons/;.$[yaluImageType]:+
 	
 	### Clean up default functions ###
 	DestroyFunc StartFunction
@@ -66,7 +66,7 @@
 	### Clear the execHistory list ###
 	DestroyFunc clearExecHistory
 	AddToFunc clearExecHistory
-		+ I Exec echo -n > "$[YALU]/logs/history"
+		+ I Exec echo -n > "$[YALU]/yaluExec_history"
 	
 	### Set window button icon ###
 	# Because to propperly over-ride the icon used by a window in fvwm you need to
