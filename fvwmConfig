@@ -332,6 +332,20 @@
 	# Don't show grids when moving/resizing windows (i.e. show window contents)
 	OpaqueMoveSize unlimited
 	Style * ResizeOpaque
+	
+	# Alt-drag
+	DestroyFunc altDrag
+	AddToFunc altDrag
+		+ M Move
+	Mouse 1 A M altDrag
+	
+	# Alt-resize
+	DestroyFunc altResize
+	AddToFunc altResize
+		+ M $[yaluResizeCorner]
+		+ M Resize
+	Mouse 3 A M altResize
+
 
 ################################################################################
 # Window Buttons                                                               #
@@ -661,21 +675,3 @@
 	
 	### Middle click to force a rearange (kindof debugging feature) ###
 	Mouse 2 I N rearangeIcons
-
-################################################################################
-# Alt-Click Actions                                                            #
-#   Actions that occur when alt and a mouse button is held down on a window.   #
-################################################################################
-	# Alt-drag
-	DestroyFunc altDrag
-	AddToFunc altDrag
-		+ M Move
-	Mouse 1 A M altDrag
-	
-	# Alt-resize
-	DestroyFunc altResize
-	AddToFunc altResize
-		+ M $[yaluResizeCorner]
-		+ M Resize
-	Mouse 3 A M altResize
-

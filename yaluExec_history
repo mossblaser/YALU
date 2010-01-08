@@ -1,1 +1,20 @@
 xterm -r 
+xmessage Hello\,\'\ -buttons\'\ \$hi -timeout 4 
+nautilus --no-desktop 
+dockOff 
+nm-applet 
+chromium 
+chromium 
+chromium 
+chromium 
+changeWall.sh 
+xterm -r 
+gvim 
+google-chrome 
+nm-applet 
+google-chrome 
+xterm -r 
+xterm -r 
+dockScreen 
+changeWall.sh 
+xterm -r 
