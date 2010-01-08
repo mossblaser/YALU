@@ -18,3 +18,19 @@ xterm -r
 dockScreen 
 changeWall.sh 
 xterm -r 
+xterm -r 
+glxgears 
+changeWall.sh 
+changeWall.sh 
+changeWall.sh 
+changeWall.sh 
+google-chrome 
+chromium 
+gvim 
+chromium 
+xterm -r 
+xmodmap .Xmodmap 
+xterm -r 
+xterm -r 
+xterm -r 
+xterm -r 

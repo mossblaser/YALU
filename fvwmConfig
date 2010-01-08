@@ -375,6 +375,15 @@
 	# Re-Place the window somewhere convenient on the screen
 	Mouse 3 T N PlaceAgain Anim # Right-Click
 	
+	# Show iconified windows
+	DestroyFunc titlebarBehaviour
+	AddToFunc titlebarBehaviour
+		+ M Move
+		+ H showIcons
+		+ D Lower
+		+ C Raise
+	Mouse 1 T N titlebarBehaviour # Hold-down mouse
+	
 	### Window Icon (Top Left) ###
 	# Show the application's icon
 	ButtonStyle 1 MiniIcon
@@ -672,6 +681,7 @@
 	
 	### Lower Icons ###
 	Key Space A CSM All (CurrentPage,Iconic) Lower # Ctrl+Shift+Alt+Space
+	Key Escape I N All (CurrentPage,Iconic) Lower # Escape (on an icon)
 	
 	### Middle click to force a rearange (kindof debugging feature) ###
 	Mouse 2 I N rearangeIcons
