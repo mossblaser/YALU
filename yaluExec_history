@@ -34,3 +34,28 @@ xterm -r
 xterm -r 
 xterm -r 
 xterm -r 
+xterm -r 
+xterm -r 
+chromium 
+nautilus --no-desktop 
+gvim 
+xmessage Hello\,\'\ -buttons\'\ \$hi -timeout 4 
+xterm -r 
+xterm -r 
+chromium 
+nautilus --no-desktop 
+gimp 
+gvim 
+xterm -r 
+xterm -r 
+xterm -r 
+pwd 
+gvim 
+xterm -r 
+xterm -r 
+xterm -r 
+xterm -r 
+xterm -r 
+xterm -r 
+xterm -r 
+xterm -r 

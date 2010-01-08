@@ -269,7 +269,7 @@
 		+ I *yaluButtons: (1x1, Swallow (UseOld) "xclock" \
 					"Exec exec xclock -digital -brief -bg $bg -fg $fg -norender -padding 0"\
 					Right)
-		+ I Style yaluButtons Sticky,NoHandles,NoTitle,NeverFocus,color grey/black
+		+ I Style yaluButtons Sticky,NoHandles,NoTitle,NeverFocus
 	
 	# Load the tray
 	setTray
@@ -320,7 +320,7 @@
 	Style * $[yaluPlaceMode]
 	
 	# Focus Mode
-	Style * $[yaluFocusMode]
+	Style (AcceptsFocus) $[yaluFocusMode]
 	
 	# Window snapping
 	DestroyFunc setSnapDistance
