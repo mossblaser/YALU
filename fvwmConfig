@@ -15,6 +15,11 @@
 #     * GNU Screen
 #     * Zenity
 #     * dmenu
+#   As a performance-enhancement for machines running over a network this file
+#   has been designed as one big file (segmented by the large banners) rather
+#   than a number of smaller files where possible (and not wholeley
+#   inapropriate). While this considerably improves startup performance it may
+#   cause a minor readability/navigation issue so my apologies for that.
 
 ################################################################################
 # Prepare FVWM and environment variables                                       #
