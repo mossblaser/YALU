@@ -16,94 +16,135 @@
 #     * Zenity
 #     * dmenu
 
-### Fix numlock problems ###
+################################################################################
+# Prepare FVWM and environment variables                                       #
+#   Set some really basic settings which are needed to make FVWM behave        #
+#   correctly and set up various important environment variables (including the#
+#   user's settings).                                                          #
+################################################################################
+	
+	### Fix numlock 'issue' ###
+	# Fvwm treats numlock as a modifier so unless it is ignored, turning it on
+	# will cause keyboard and mouse bindings not to work when numlock is on.
 	IgnoreModifiers 2
 
-### Set the YALU directory ###
+	### Set the YALU directory ###
+	# This location is used to load/reffer to all files used by YALU and can be
+	# changed if the user desires not to keep the yalu directory here for some
+	# reason.
 	SetEnv YALU "$[HOME]/.yalu"
 
-### Load user configuration ###
+	### Load user configuration ###
 	Read "$[YALU]/yaluConfig"
 
-### Set the path for icons ###
+	### Set the path for icons ###
+	# Note that here images are limited to a user-specified file type, this means
+	# that if the user's FVWM install doesn't support PNG they can simply choose
+	# to use XPM all the time (or if it does, reap the benefits of smoother icons)
 	ImagePath $[YALU]/images/$[yaluTheme];.$[yaluImageType]:+
+	
+	### Clean up default functions ###
+	DestroyFunc StartFunction
+	DestroyFunc InitFunction
+	DestroyFunc RestartFunction
+	DestroyFunc ExitFunction
+
+	### Enable FvwmCommands ###
+	AddToFunc StartFunction "I" Module FvwmCommandS
 
 ################################################################################
 # Utility Functions                                                            #
-#   Various useful functions used in YALU                                      #
+#   Functions which are intended to be re-used (rather than just generate one  #
+#   specific menu for instance)                                                #
 ################################################################################
 	
-	### Re-set all desk related settings ###
-	DestroyFunc setDesks
-	AddToFunc setDesks
-		+ I setPagingKeys # Update the limits on keyboard shortcuts
-		+ I setPager # Re-load the pager
-	
-	### Re-set all page related settings ###
-	DestroyFunc setPages
-	AddToFunc setPages
-		+ I setDesktopPages # Update the desktop dimensions
-		+ I setPager # Re-load the pager
-	
-	### Clear the application history list ###
+	### Clear the execHistory list ###
 	DestroyFunc clearExecHistory
 	AddToFunc clearExecHistory
 		+ I Exec echo -n > "$[YALU]/logs/history"
-
-	# Function to set icons for window buttons (setButtonIcon buttonID buttonName
+	
+	### Set window button icon ###
+	# Because to propperly over-ride the icon used by a window in fvwm you need to
+	# clear the icon and then set the three different states for that button this
+	# function is there to automate it. It will set a given window button to use a
+	# particular icon name appended with Button or ButtonGrey as apropriate.
+	# Usage:
+	#   setButtonIcon buttonID imageName
 	DestroyFunc setButtonIcon
 	AddToFunc setButtonIcon
-		+ I ButtonStyle $0 Pixmap "$[YALU]/images/$[yaluTheme]/clear.$[yaluImageType]"
-		+ I AddButtonStyle $0 ActiveUp Pixmap "$[YALU]/images/$[yaluTheme]/$1Button.$[yaluImageType]" -- Flat
-		+ I AddButtonStyle $0 ActiveDown Pixmap "$[YALU]/images/$[yaluTheme]/$1Button.$[yaluImageType]" -- Flat
-		+ I AddButtonStyle $0 Inactive Pixmap "$[YALU]/images/$[yaluTheme]/$1ButtonGrey.$[yaluImageType]" -- Flat
-
-	# Calls up whatever menu editing facilities are available for the launcher
+		+ I ButtonStyle $0 Pixmap "clear"
+		+ I AddButtonStyle $0 ActiveUp Pixmap "$1Button" -- Flat
+		+ I AddButtonStyle $0 ActiveDown Pixmap "$1Button" -- Flat
+		+ I AddButtonStyle $0 Inactive Pixmap "$1ButtonGrey" -- Flat
+	
+	### Present an editor for the launcher ###
+	# Presently this just launches a text editor, in the future this could be a
+	# propper menu editing utility.
 	DestroyFunc editLauncher
 	AddToFunc editLauncher
 		+ I YaluExec $[yaluEditor] "$[YALU]/menu"
 
-	# Function which will Only carry out an action if clicked (not dragged)
+	### Only carry out action if not dragged ###
+	# Useful if you only want a particular command to be executed when the user
+	# clicks and doesn't drag away (e.g. on a window button)
+	# Usage:
+	#   abortOnDrag [Fvwm Commands]
 	DestroyFunc abortOnDrag
 	AddToFunc abortOnDrag
 		+ C $*
 		+ M Nop
 
-	# Do an action and then sort the icons
+	### Sort icons after command ###
+	# Will execute a command and then afterwards re-arange iconified windows.
+	# Useful if your action is likely to mess them up (e.g. closing one)
+	# Usage:
+	#   doAndRearangeIcons [Fvwm Commands]
 	DestroyFunc doAndRearangeIcons
 	AddToFunc doAndRearangeIcons
 		+ I $*
 		+ I rearangeIcons
 
-	# Rearanges icons optinally
+	### Rearanges iconfied windows neatly ###
+	# Note that this actually slightly delays the action to ensure that any
+	# actions carried out previously which might have effected the iconified
+	# windows positions can complete first.
 	DestroyFunc rearangeIcons
 	AddToFunc rearangeIcons
-		+ I	Schedule 100 All (CurrentPage,Iconic) RecaptureWindow # Re-Place remaining icons
+		+ I	Schedule 100 All (CurrentPage,Iconic) RecaptureWindow
 
-	# Uniconify ready for use
+	### De-iconify window ###
+	# De-iconify a window and warp the cursor to it ready to use
 	DestroyFunc unIconify
 	AddToFunc unIconify
 		+ I Iconify False
 		+ I WarpToWindow 50% 50%
 		+ I	rearangeIcons
 
-	# Uniconify the window to somewhere empty
+	# As above but place the window out of the way somewhere rather than its
+	# original position.
 	DestroyFunc unIconifyToSpace
 	AddToFunc unIconifyToSpace
 		+ I Iconify False
 		+ I PlaceAgain
 		+ I	rearangeIcons
 
-	# Move the current window to the given page/desktop
-	#   eg: moveAndGoTo Page 0p -1p
-	#       moveAndGoTo Desk 1 0 0 1
+	### Move and navigate to a different page/desktop ###
+	# Carries out all the needed functions to raise, move a window to another
+	# page/desk and then follow it.
+	# Usage (eg):
+	#   moveAndGoTo Page 0p -1p
+	#   moveAndGoTo Desk 1 0 0 1
 	DestroyFunc moveAndGoTo
 	AddToFunc moveAndGoTo
 		+ I Raise
 		+ I MoveTo$*
 		+ I Goto$*
 
-	# 'Fling' Windows
+	### Window Flinging ###
+	# 'Flinging' a window moves it to a particular screen-edge and then maximizes
+	# it along that edge. Animated!
+	#   (Note that windows are de-maximised first to work-around the fvwm behavior
+	#   bug of not changing the proportions of already-maximised windows)
 	AddToFunc flingRight
 		+ I	Maximize False
 		+ I	Maximize True 0 100
@@ -121,7 +162,9 @@
 		+ I	Maximize True 100 0
 		+ I	AnimatedMove 0 -0 Warp
 
-	# 'Thrown' windows
+	### Window 'throwing' ###
+	# 'Throwing' a window simply moves it to the screen edge in the specified
+	# direction. Animated!
 	AddToFunc throwRight
 		+ I	AnimatedMove -0 w Warp
 	AddToFunc throwLeft
@@ -131,104 +174,120 @@
 	AddToFunc throwDown
 		+ I	AnimatedMove w -0 Warp
 	
-	### An alias to run the yaluMenu external command ###
+	### External Command Wrappers ###
+	
+	# (Re)generates dynamic menus using the yaluMenu script.
+	# Usage:
+	#   YaluMenu [menuName]
+	# If no menu name is specified, all menus are regenerated
 	DestroyFunc YaluMenu
 	AddToFunc YaluMenu
 		+ I PipeRead "$[YALU]/bin/yaluMenu $*"
 	
-	### An alias to run the yaluConfig external command ###
+	# Set a particular option in the user's configuration using the yaluConfig
+	# script.
+	# Usage:
+	#   YaluConfig optionName newValue
 	DestroyFunc YaluConfig
 	AddToFunc YaluConfig
 		+ I Exec exec "$[YALU]/bin/yaluConfig" $*
 	
-	### An alias to run the yaluConfigGUI external command ###
+	# Same as the above but does not get passed a new value, instead it prompts
+	# the user to enter a value in a zenity-powered textbox. The window contains a
+	# prompt including your message and the option's default value. The
+	# current-option is pre-entered into the text-area.
+	# Usage:
+	#   YaluConfigGUI optionName prompt
 	DestroyFunc YaluConfigGUI
 	AddToFunc YaluConfigGUI
 		+ I Exec exec "$[YALU]/bin/yaluConfigGUI" $*
 	
-	### Like Exec except this command uses a script which keeps hold of the output
+	### Execute an external program and catch the output ###
+	# This command functions like Exec however it places the command in a screen
+	# session so that the user can later view/interact with its stdin/out/err. It
+	# also further wraps the program in a script which keeps the shell alive for a
+	# short time after the command exits so the user can determine the exit status
+	# or take-over the shell.
+	# Usage:
+	#   YaluExec command [command's options]
+	# Note: You should not prepend with exec (like you might normally with Exec)
+	#       as this is taken care of by the script.
+	# Note: You can't do any shell operations (such as piping or redirecting) like
+	#       you can with exec.
 	DestroyFunc YaluExec
 	AddToFunc YaluExec
 		+ I Exec exec "$[YALU]/bin/yaluExec" $*
 
-### Load the list of icons ###
-	Read "$[YALU]/icons"
-
-### Clean up functions ###
-	# System functions
-	DestroyFunc StartFunction
-	DestroyFunc InitFunction
-	DestroyFunc RestartFunction
-	DestroyFunc ExitFunction
-
-### Enable FvwmConsole ###
-	AddToFunc StartFunction "I" Module FvwmCommandS
-
 ################################################################################
 # Pager                                                                        #
-#   Provides a pager to show desks and pages to the user                       #
+#   Provides a pager to show desks and pages to the user, nothing particularly #
+#   special here.                                                              #
 ################################################################################
-	### Load FvwmPager ###
-		DestroyFunc setPager
-		AddToFunc setPager
-			+ I KillModule FvwmPager yaluPager
-			+ I Module FvwmPager yaluPager 0 $[yaluDesks]
-			+ I *yaluPager: Back black
-			+ I *yaluPager: Fore grey20
-			+ I *yaluPager: Columns    1
-			+ I *yaluPager: Geometry 150+0-0
-			+ I *yaluPager: LabelsBelow
-			+ I Style yaluPager Sticky,NoHandles,NoTitle,color grey/black
-		setPager
+	# This is wrapped in a function so that it can be easily re-loaded when (for
+	# instance) the number of pages changes.
+	DestroyFunc setPager
+	AddToFunc setPager
+		+ I KillModule FvwmPager yaluPager # Kill any old pages started by YALU
+		+ I Module FvwmPager yaluPager 0 $[yaluDesks]
+		+ I *yaluPager: Back black
+		+ I *yaluPager: Fore grey20
+		+ I *yaluPager: Columns 1 # Desks are shown vertically
+		+ I *yaluPager: Geometry +0-0 # Place at the bottom-left of the screen
+		+ I *yaluPager: LabelsBelow # Desk labels underneath
+		+ I Style yaluPager Sticky,NoHandles,NoTitle,color grey/black
+	
+	# The pager is loaded by the paging and desk functions
 
 ################################################################################
 # Tray                                                                         #
 #   Provides a tray containing a clock, system tray and load monitor           #
 ################################################################################
-	DestroyFunc setButtons
-	AddToFunc setButtons
-		+ I KillModule FvwmButtons yaluButtons
+	DestroyFunc setTray
+	AddToFunc setTray
+		+ I KillModule FvwmButtons yaluButtons # Close any old instances
 		+ I Module FvwmButtons yaluButtons
 		+ I *yaluButtons: Back black
 		+ I *yaluButtons: Fore white
-		+ I *yaluButtons: BoxSize smart
-		+ I *yaluButtons: Columns
+		+ I *yaluButtons: BoxSize smart # Auto-resize
+		+ I *yaluButtons: Columns # Horizontal stacking
 		+ I *yaluButtons: Rows 1
-		+ I *yaluButtons: Geometry 500x24-0-0
-		+ I *yaluButtons: Frame 0
+		+ I *yaluButtons: Geometry 500x24-0-0 # Maximum size
+		+ I *yaluButtons: Frame 0 # Invisible border
+		# Load monitor
 		+ I *yaluButtons: (1x1, Swallow "xload"\
 					"Exec exec xload -fg $fg -bg $bg -update 1 -nolabel -geometry -300-300")
+		# Trayer (For Sys-tray icons)
 		+ I *yaluButtons: (3x1, Swallow (UseOld, Kill, NoHints) "stalonetray" \
 					"Exec exec stalonetray -bg $bg --no-shrink --icon-gravity W"\
 					Right)
+		# A simple clock
 		+ I *yaluButtons: (1x1, Swallow (UseOld) "xclock" \
 					"Exec exec xclock -digital -brief -bg $bg -fg $fg -norender -padding 0"\
 					Right)
 		+ I Style yaluButtons Sticky,NoHandles,NoTitle,NeverFocus,color grey/black
-	setButtons
 	
-	# Super+Alt+Space To Raise Buttons
-	Key Space A M4 All ("yaluButtons") Raise
-	
-	# Ctl+Super+Alt+Space To Lower Buttons
-	Key Space A CM4 All ("yaluButtons") Lower
-
-################################################################################
-# Theming                                                                      #
-#   Control strictly appearence-related aspects of the desktop with a theme    #
-#   config.                                                                    #
-################################################################################
-	Read "$[YALU]/themes/$[yaluTheme]"
+	# Load the tray
+	setTray
 
 ################################################################################
 # Desks and Pages                                                              #
 #   Control the number of pages and desks available to the user.               #
 ################################################################################
-	# The number of pages per desk
-	DestroyFunc setDesktopPages
-	AddToFunc setDesktopPages
+	# The following functions set (or re-set) the various options as specified in
+	# the config file.
+	
+	# The number of desks
+	DestroyFunc setDesks
+	AddToFunc setDesks
+		+ I setPagingKeys # Update the limits on keyboard shortcuts
+		+ I setPager # Re-load the pager
+	
+	# Number of pages per desk
+	DestroyFunc setPages
+	AddToFunc setPages
 		+ I DesktopSize $[yaluDeskWidth]x$[yaluDeskHeight]
-	setDesktopPages
+		+ I setPager # Re-load the pager
+	
 	
 	# The % of the screen to jump when the mouse moves off the edge
 	DestroyFunc setEdgeJump
@@ -236,15 +295,21 @@
 		+ I EdgeScroll $[yaluEdgeJumpWidth] $[yaluEdgeJumpHeight]
 	setEdgeJump
 	
-	# What edge resistance should there be
+	# How long must the user hold their mouse next to the screen edge before it
+	# jumps to the next desktop
 	DestroyFunc setEdgeResistDelay
 	AddToFunc setEdgeResistDelay
 		+ I EdgeResistance $[yaluEdgeResistDelay] $[yaluSnapDistance]
-	#setEdgeResistDelay # Done by window snapping
+	
+	### Load the relevent settings ###
+	setPages
+	setDesks
+	setEdgeJump
+	#setEdgeResistDelay # Applied when setting window snapping
 	
 ################################################################################
 # Window behaviour                                                             #
-#   Control way windows interact and are placed                                #
+#   Control the way windows interact and are placed                            #
 ################################################################################
 	# Placement Mode
 	Style * $[yaluPlaceMode]
@@ -258,38 +323,90 @@
 		+ I Style * SnapAttraction $[yaluSnapDistance] SameType
 		+ I setEdgeResistDelay
 	setSnapDistance
+	
+	# Don't show grids when moving/resizing windows (i.e. show window contents)
+	OpaqueMoveSize unlimited
+	Style * ResizeOpaque
+
+################################################################################
+# Window Buttons                                                               #
+#   What buttons should windows have and how should they look/act              #
+################################################################################
+	### Top Right (Close) ###
+	setButtonIcon 2 "close"
+	Mouse 1 2 N abortOnDrag Close # Left-Click: Close
+	Mouse 1 2 4 abortOnDrag Delete # Super+Left-Click: Delete
+	Mouse 1 2 C abortOnDrag Destroy # Ctl+Left-Click: Destroy
+	
+	### Top Right (Maximize) ###
+	setButtonIcon 4 "maximize"
+	Mouse 1 4 N abortOnDrag Maximize # Left-Click: Maximize
+	Mouse 2 4 N abortOnDrag Maximize 100 0 # Middle-Click: Wide
+	Mouse 3 4 N abortOnDrag Maximize 0 100 # Right-Click: Tall
+	
+	### Top Right (Iconify) ###
+	setButtonIcon 6 "minimize"
+	Mouse 1 6 N abortOnDrag Iconify # Left-Click: Iconify
+	Mouse 3 6 N abortOnDrag WindowShade # Right-Click: Shade
+	
+	### Title Bar ###
+	# Make window Sticky
+	Mouse 2 T N Stick # Middle-Click
+	
+	# Re-Place the window somewhere convenient on the screen
+	Mouse 3 T N PlaceAgain Anim # Right-Click
+	
+	### Window Icon (Top Left) ###
+	# Show the application's icon
+	ButtonStyle 1 MiniIcon
+	
+	# Show The Window Menu
+	Mouse 0 1 N Menu windowMenu # Click
+
+################################################################################
+# Window Borders                                                               #
+#   The general appearence of window edging.                                   #
+################################################################################
+	# Make window borders flat
+	#BorderStyle Active -- Flat
+	#BorderStyle Inactive -- Flat
+	
+	# Make resizeable windows have a 3px border
+	Style * HandleWidth 4
+	
+	# Make fixed windows have a 1px border
+	Style * BorderWidth 1
+	
+	# Make Window borders depress when clicked
+	Style * DepressableBorder
+	
+	# Decorate dialogues too
+	Style * DecorateTransient
+	
+	# Make Window Buttons flat
+	ButtonStyle All ActiveUp -- Flat
+	ButtonStyle All Inactive -- Flat
+	
+	# Make Window Titles flat
+	TitleStyle ActiveUp -- Flat
+	TitleStyle Inactive -- Flat
 
 ################################################################################
 # Menus                                                                        #
 #   Define each of the different menus that can be used.                       #
 ################################################################################
+	### Define the default appearence and basic behaviour of menus ###
+	MenuStyle * BorderWidth 0
+	MenuStyle * Background Grey20
+	MenuStyle * Foreground White
+	MenuStyle * HilightBack Grey40
+	MenuStyle * Hilight3DOff
+	MenuStyle * PopupImmediately
+	MenuStyle * AutomaticHotkeys # Generate hotkeys where undefined
+	MenuStyle * PopupOffset -12 100 # Don't overlap menus
 	
 	### Generate all dynamic menus ###
 	YaluMenu
-	
-	### Launcher ###
-	#YaluMenu launcher
-	
-	AddToFunc yaluApplyMenus
-	 + I Mouse 1 R N Menu launcher # Middle-click desktop
-	 + I Key F1 A 4 Menu launcher # Super+F1 everywhere else
-	
-	### Dmenu ###
-	 + I Key Space A 4 Exec exec "$[YALU]/bin/yaluDmenu" # Super+Space show dmenu
-	
-	### YaluExec output viewer menu ###
-	#YaluMenu execOutput
-	
-	AddToFunc yaluApplyMenus
-		+ I Mouse 3 R M Menu execOutput # Alt+Right-click desktop
-		+ I Key F4 A 4 Menu execOutput # Super+F4 everywhere else
-	
-	### Application History List ###
-	#yaluMenu execHistory
-	
-	AddToFunc yaluApplyMenus
-		+ I Mouse 3 R N Menu execHistory # Right-click desktop
-		+ I Key F3 A 4 Menu execHistory # Super+F3 everywhere else
 	
 	### YALU Configuration Menu ###
 	DestroyMenu yaluConfiguration
@@ -303,10 +420,6 @@
 		+ "" Nop
 		+ "%restart%&Restart" Restart
 		+ "%quit%&Quit" Quit
-	
-	AddToFunc yaluApplyMenus
-		+ I Mouse 2 R N Menu yaluConfiguration # Middle-click desktop
-		+ I Key F2 A 4 Menu yaluConfiguration # Super+F2 everywhere else
 	
 	### Programs (Config) Menu ###
 	DestroyFunc generatePrograms
@@ -368,18 +481,35 @@
 		+ I 	+ "Current Desk: $[desk.n]" Nop
 		+ I 	+ "" Nop
 		+ I 	+ "Useful Things Coming soon..." -
-	
 	buildWindowMenu
 	
-	### Link menus to shortcuts on startup ###
-	AddToFunc StartFunction
-		+ I yaluApplyMenus
+	### Set Desktop Shortcuts ###
+	Mouse 1 R N Menu launcher # Left-click Launcher
+	Mouse 2 R N Menu yaluConfiguration # Middle-click YALU Config
+	Mouse 3 R N Menu execHistory # Right-click Program History
+	Mouse 3 R M Menu execOutput # Alt+Right-click Program output
 
 ################################################################################
 # Keyboard Shortcuts                                                           #
 #   Set keyboard shortcuts for useful actions.                                 #
 ################################################################################
+	### Menus ###
+		# Launcher
+		Key F1 A 4 Menu launcher # Super+F1
+		
+		# YALU Configuration Menu
+		Key F2 A 4 Menu yaluConfiguration # Super+F2
+		
+		# Application History List
+		Key F3 A 4 Menu execHistory # Super+F3
+		
+		# YaluExec output viewer menu
+		Key F4 A 4 Menu execOutput # Super+F4
+	
 	### General ###
+		# dmenu
+		Key Space A 4 Exec exec "$[YALU]/bin/yaluDmenu" # Super+Space show dmenu
+		
 		# Window List
 		Key Tab A M WindowList # Alt+Tab
 		
@@ -437,6 +567,9 @@
 		setPagingKeys
 	
 	### Window Control ###
+		# Show The Window Menu
+		Key F1 A M Menu windowMenu # Alt+F1
+		
 		# Close
 		Key F4 A M Close # Graceful Close, Alt+F4
 		Key F4 A M4 Delete # Forceful Close, Alt+Super+F4
@@ -468,49 +601,60 @@
 		
 		# Re-draw window
 		Key F10 A M RefreshWindow # Alt+F10
+	
+	### System Tray ###
+		# Super+Alt+Space To Raise
+		Key Space A M4 All ("yaluButtons") Raise
+		
+		# Ctl+Super+Alt+Space To Lower
+		Key Space A CM4 All ("yaluButtons") Lower
 
 ################################################################################
 # Iconified Window Behaviour                                                   #
 #   Control what happens to iconified windows when the user clicks on them.    #
 ################################################################################
-	# Click to open
+	### Appearence ###
+	Style * IconBox 800x600+0+0
+	Style * StickyIcon
+	
+	### Click Behaviour ###
 	DestroyFunc mouseUnIconify
 	AddToFunc mouseUnIconify
-		+ C unIconify
+		+ C unIconify # Click to open
 		+ M Nop
-		+ H unIconifyToSpace
+		+ H unIconifyToSpace # Hold down to open into a spare space
 	Mouse 1 I N mouseUnIconify
 	
-	# Space/Return to open
+	### Space/Return to open ###
 	Key Space I N unIconify
 	Key Return I N unIconify
 	
-	# Ctl+Return to open into a space
+	### Ctl+Return to open into a space ###
 	Key Return I C unIconifyToSpace
 	
-	# Close Icon
+	### Close Icon ###
 	Mouse 3 I N doAndRearangeIcons Close # Right-Click
 	Key Delete I N doAndRearangeIcons Close # Delete
 	
-	# Delete Icon
+	### Delete Icon ###
 	Mouse 3 I 4 doAndRearangeIcons Delete # Super-Right-Click
 	Key Delete I 4 doAndRearangeIcons Delete # Super+Delete
 	
-	# Destroy Icon
+	### Destroy Icon ###
 	Mouse 3 I C doAndRearangeIcons Destroy # Ctrl-Right-Click
 	Key Delete I C doAndRearangeIcons Destroy # Super+Delete
 	
-	# Raise/Cycle through icons
+	### Raise and Cycle through icons ###
 	DestroyFunc showIcons
 	AddToFunc showIcons
 		+ I All (CurrentPage,Iconic) Raise # Shift+Alt+Space
 		+ I Next (CurrentPage,Iconic) WarpToWindow # Shift+Alt+Space
 	Key Space A SM showIcons # Shift+Alt+Space
 	
-	# Lower Icons
+	### Lower Icons ###
 	Key Space A CSM All (CurrentPage,Iconic) Lower # Ctrl+Shift+Alt+Space
 	
-	# Middle click to force rearange
+	### Middle click to force a rearange (kindof debugging feature) ###
 	Mouse 2 I N rearangeIcons
 
 ################################################################################
@@ -529,3 +673,4 @@
 		+ M $[yaluResizeCorner]
 		+ M Resize
 	Mouse 3 A M altResize
+

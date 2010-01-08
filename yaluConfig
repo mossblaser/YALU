@@ -11,6 +11,9 @@
 #   User configurable options for yalu. Most of these should be configurable
 #   using the menus so it is reccomended that you use them.
 
+################################################################################
+# Default Applications                                                         #
+################################################################################
 # Text editor to use
 SetEnv yaluEditor "gvim"
 
@@ -20,22 +23,33 @@ SetEnv yaluTerminal "xterm -r"
 # Web browser to use
 SetEnv yaluBrowser "chromium"
 
-# What list of applications should be shown on the right click menu?
-#  "recent" or "frequent"
-SetEnv yaluExecHistoryType "frequent"
-
-# YALU Theme
-SetEnv yaluTheme "default"
-
-# File type used for icons
-SetEnv yaluImageType "png"
-
+################################################################################
+# Window Behaviour                                                             #
+################################################################################
 # Focus model
 #   (Ensure SetEnv is the same to allow GUI config, nasty hack, I know)
 SetEnv yaluFocusMode "MouseFocus"
 
 # Window Placing
 SetEnv yaluPlaceMode "MinOverlapPlacement"
+
+# Distance for window snapping (or the edge of the screen to resist resize)
+SetEnv yaluSnapDistance "10"
+
+# The corner to start alt-resizes from
+# Valid options are:
+#  From Cursor: "Nop"
+#  From Top-Left: "WarpToWindow 0% 0%"
+#  From Top-Right: "WarpToWindow 100% 0%"
+#  From Bottom-Left: "WarpToWindow 0% 100%"
+#  From Bottom-Right: "WarpToWindow 100% 100%"
+SetEnv yaluResizeCorner "WarpToWindow 100% 100%"
+
+################################################################################
+# Desk and Paging Prefrences                                                   #
+################################################################################
+# Range of numbers of virtual desktops -1
+SetEnv yaluDesks "0"
 
 # Desktop Sizes (In Pages)
 SetEnv yaluDeskWidth "3"
@@ -48,21 +62,20 @@ SetEnv yaluEdgeJumpHeight "100"
 # Edge-resistance for the pages (In ms)
 SetEnv yaluEdgeResistDelay "0"
 
-# Distance for window snapping (or the edge of the screen to resist resize)
-SetEnv yaluSnapDistance "10"
-
-# Range of numbers of virtual desktops -1
-SetEnv yaluDesks "0"
-
-# The corner to start alt-resizes from
-# Valid options are:
-#  From Cursor: "Nop"
-#  From Top-Left: "WarpToWindow 0% 0%"
-#  From Top-Right: "WarpToWindow 100% 0%"
-#  From Bottom-Left: "WarpToWindow 0% 100%"
-#  From Bottom-Right: "WarpToWindow 100% 100%"
-SetEnv yaluResizeCorner "WarpToWindow 100% 100%"
-
-# The delay between a command completing and the options disapearing for
-# yaluDelayExit controlled scripts (seconds)
+################################################################################
+# Misc                                                                         #
+################################################################################
+# The delay between a command completing and the screen terminating for
+# yaluDelayExit (i.e. programs launched from a menu) controlled scripts (seconds)
 SetEnv yaluDelayExitTime 30
+
+# What list of applications should be shown on the right click menu?
+#  "recent" or "frequent"
+SetEnv yaluExecHistoryType "frequent"
+
+# YALU Theme
+SetEnv yaluTheme "default"
+
+# File type used for icons
+SetEnv yaluImageType "png"
+
