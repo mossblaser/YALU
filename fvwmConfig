@@ -33,11 +33,14 @@
 	# will cause keyboard and mouse bindings not to work when numlock is on.
 	IgnoreModifiers 2
 
-	### Set the YALU directory ###
+	### Set the YALU instalation directory ###
 	# This location is used to load/reffer to all files used by YALU and can be
 	# changed if the user desires not to keep the yalu directory here for some
 	# reason.
 	SetEnv YALU "$[HOME]/.yalu"
+	
+	### Set the YALU directory containing per-user settings ###
+	SetEnv LocalYALU "$[HOME]/.yalu"
 
 	### Load user configuration ###
 	Read "$[YALU]/yaluConfig"

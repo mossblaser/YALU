@@ -391,7 +391,7 @@ def makeYaluConfigRadioMenu(config, option, *args, **params):
 
 if __name__ == "__main__":
 	# Move into the YALU dir so that all paths from now on can be relative
-	os.chdir(os.environ["YALU"])
+	os.chdir(os.environ["LocalYALU"])
 	
 	# Create a test menu
 	test = Menu("test", "A Test Menu", True)

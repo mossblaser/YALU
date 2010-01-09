@@ -30,7 +30,6 @@ SetEnv yaluBrowser "chromium"
 # Window Behaviour                                                             #
 ################################################################################
 # Focus model
-#   (Ensure SetEnv is the same to allow GUI config, nasty hack, I know)
 SetEnv yaluFocusMode "MouseFocus"
 
 # Window Placing
