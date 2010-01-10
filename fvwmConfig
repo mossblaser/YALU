@@ -32,6 +32,9 @@
 	# Fvwm treats numlock as a modifier so unless it is ignored, turning it on
 	# will cause keyboard and mouse bindings not to work when numlock is on.
 	IgnoreModifiers 2
+	
+	### Set click-and-hold delay ###
+	ClickTime 250
 
 	### Set the YALU instalation directory ###
 	# This location is used to load/reffer to all files used by YALU and can be
@@ -49,7 +52,10 @@
 	# Note that here images are limited to a user-specified file type, this means
 	# that if the user's FVWM install doesn't support PNG they can simply choose
 	# to use XPM all the time (or if it does, reap the benefits of smoother icons)
-	ImagePath $[YALU]/themes/$[yaluTheme]/icons;.$[yaluImageType]:$[YALU]/icons/;.$[yaluImageType]:+
+	DestroyFunc setImageType
+	AddToFunc setImageType
+		+ I ImagePath $[YALU]/themes/$[yaluTheme]/icons;.$[yaluImageType]:$[YALU]/icons/;.$[yaluImageType]:+
+	setImageType
 	
 	### Clean up default functions ###
 	DestroyFunc StartFunction
@@ -190,7 +196,7 @@
 	# If no menu name is specified, all menus are regenerated
 	DestroyFunc YaluMenu
 	AddToFunc YaluMenu
-		+ I PipeRead "$[YALU]/bin/yaluMenu $*"
+		+ I PipeRead "$[YALU]/bin/yaluMenu.py $*"
 	
 	# Set a particular option in the user's configuration using the yaluConfig
 	# script.
@@ -198,7 +204,7 @@
 	#   YaluConfig optionName newValue
 	DestroyFunc YaluConfig
 	AddToFunc YaluConfig
-		+ I Exec exec "$[YALU]/bin/yaluConfig" $*
+		+ I Exec exec "$[YALU]/bin/yaluConfig.py" $*
 	
 	# Same as the above but does not get passed a new value, instead it prompts
 	# the user to enter a value in a zenity-powered textbox. The window contains a
@@ -225,6 +231,13 @@
 	DestroyFunc YaluExec
 	AddToFunc YaluExec
 		+ I Exec exec "$[YALU]/bin/yaluExec" $*
+	
+	# This function is expected by yaluConfig however it doesn't need to do
+	# anything
+	DestroyFunc setDelayExitTime
+	AddToFunc setDelayExitTime I Nop
+	DestroyFunc setTheme
+	AddToFunc setTheme I Nop
 
 ################################################################################
 # Pager                                                                        #
@@ -296,12 +309,22 @@
 		+ I DesktopSize $[yaluDeskWidth]x$[yaluDeskHeight]
 		+ I setPager # Re-load the pager
 	
+	# Functions required by yaluConfig
+	DestroyFunc setDeskHeight
+	AddToFunc setDeskHeight I setPages
+	DestroyFunc setDeskWidth
+	AddToFunc setDeskWidth I setPages
 	
 	# The % of the screen to jump when the mouse moves off the edge
 	DestroyFunc setEdgeJump
 	AddToFunc setEdgeJump
 		+ I EdgeScroll $[yaluEdgeJumpWidth] $[yaluEdgeJumpHeight]
 	setEdgeJump
+	
+	DestroyFunc setEdgeJumpWidth
+	AddToFunc setEdgeJumpWidth I setEdgeJump
+	DestroyFunc setEdgeJumpHeight
+	AddToFunc setEdgeJumpHeight I setEdgeJump
 	
 	# How long must the user hold their mouse next to the screen edge before it
 	# jumps to the next desktop
@@ -320,10 +343,16 @@
 #   Control the way windows interact and are placed                            #
 ################################################################################
 	# Placement Mode
-	Style * $[yaluPlaceMode]
+	DestroyFunc setPlaceMode
+	AddToFunc setPlaceMode
+		+ I Style * $[yaluPlaceMode]
+	setPlaceMode
 	
 	# Focus Mode
 	Style (AcceptsFocus) $[yaluFocusMode]
+	
+	DestroyFunc setFocusMode
+	AddToFunc setFocusMode I Style (AcceptsFocus) $[yaluFocusMode]
 	
 	# Window snapping
 	DestroyFunc setSnapDistance
@@ -348,6 +377,10 @@
 		+ M $[yaluResizeCorner]
 		+ M Resize
 	Mouse 3 A M altResize
+	
+	# Required function by yaluConfig -- doesn't need to do anything
+	DestroyFunc setResizeCorner
+	AddToFunc setResizeCorner I Nop
 
 
 ################################################################################
@@ -461,15 +494,12 @@
 	 + I 	+ "View Program &Output (Super+F4)" Popup execOutput
 	 + I 	+ "" Nop
 	 + I 	+ "Edit &Launcher" editLauncher
-	 + I 	+ "Change &Terminal Program ($[yaluTerminal])" \
-	     	   YaluConfigGUI terminal "Select Terminal for YALU"
-	 + I 	+ "Change Text &Editor ($[yaluEditor])" \
-	     	   YaluConfigGUI editor "Select Text Editor for YALU"
-	 + I 	+ "Change &Web Browser ($[yaluBrowser])" \
-	     	   YaluConfigGUI browser "Select Web Browser for YALU"
+	 + I 	+ "Change &Terminal Program ($[yaluTerminal])" Popup TerminalConfig
+	 + I 	+ "Change Text &Editor ($[yaluEditor])" Popup EditorConfig
+	 + I 	+ "Change &Web Browser ($[yaluBrowser])" Popup BrowserConfig
 	 + I 	+ "" Nop
 	 + I 	+ "Program Usage &History (Super+F3)" Popup execHistory
-	 + I 	+ "&Sort History By..." Popup execHistoryConfig
+	 + I 	+ "&Sort History By..." Popup execHistoryTypeConfig
 	 + I 	+ "%clearHistory%&Clear History" clearExecHistory
 	generatePrograms
 	
@@ -519,6 +549,16 @@
 	Mouse 2 R N Menu yaluConfiguration # Middle-click YALU Config
 	Mouse 3 R N Menu execHistory # Right-click Program History
 	Mouse 3 R M Menu execOutput # Alt+Right-click Program output
+	
+	# These functions are expected by yaluConfig but they need not do anything
+	DestroyFunc setExecHistoryType
+	AddToFunc setExecHistoryType I Nop
+	DestroyFunc setTerminal
+	AddToFunc setTerminal I YaluMenu launcher
+	DestroyFunc setBrowser
+	AddToFunc setBrowser I YaluMenu launcher
+	DestroyFunc setEditor
+	AddToFunc setEditor I YaluMenu launcher
 
 ################################################################################
 # Keyboard Shortcuts                                                           #

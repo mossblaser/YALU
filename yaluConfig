@@ -21,7 +21,7 @@
 SetEnv yaluEditor "gvim"
 
 # Terminal emulator to use
-SetEnv yaluTerminal "xterm -r"
+SetEnv yaluTerminal "xterm"
 
 # Web browser to use
 SetEnv yaluBrowser "chromium"
@@ -30,7 +30,7 @@ SetEnv yaluBrowser "chromium"
 # Window Behaviour                                                             #
 ################################################################################
 # Focus model
-SetEnv yaluFocusMode "MouseFocus"
+SetEnv yaluFocusMode "ClickToFocus"
 
 # Window Placing
 SetEnv yaluPlaceMode "MinOverlapPlacement"

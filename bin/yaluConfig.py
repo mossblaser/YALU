@@ -36,15 +36,11 @@ yaluOptions = {
 		"default": "gvim",
 		"values": [
 			("GVim", "gvim"),
-			("Vim (Terminal)", "$[yaluTerminal] -e vim"),
-			("Vi (Terminal)", "$[yaluTerminal] -e vi"),
-			None,
 			("Emacs", "emacs"),
 			("Emacs Client", "emacsclient"),
-			("Jove (Terminal)", "jove"),
 			None,
-			("N-Edit", "nedit"),
-			("GEdit", "gedit"),
+			("NEdit", "nedit"),
+			("gedit", "gedit"),
 			("KATE", "kate"),
 			None,
 			("Custom", None, "Please enter your choice of graphical text editor."),
@@ -53,13 +49,14 @@ yaluOptions = {
 	"Terminal" : {
 		"default": "xterm",
 		"values": [
-			("aterm", "aterm"),
-			("eterm", "eterm"),
-			("rxvt", "rxvt"),
 			("xterm", "xterm"),
 			None,
 			("Gnome Terminal", "gnome-terminal"),
 			("Konsole", "konsole"),
+			None,
+			("aterm", "aterm"),
+			("eterm", "eterm"),
+			("rxvt", "rxvt"),
 			None,
 			("Custom", None, "Please enter your choice of terminal emulator."),
 		]
@@ -101,6 +98,10 @@ yaluOptions = {
 		"default": 10,
 		"values": [ ("Disabled", 0), ] + [
 			("%ipx"%(x,), x) for x in range(1, 11)
+		] + [
+			("%ipx"%(x,), x) for x in range(15, 26, 5)
+		] + [
+			("%ipx"%(x,), x) for x in range(50, 201, 50)
 		] + [
 			None,
 			("Custom", None, "How many px should the snapping distance be?")
@@ -158,13 +159,13 @@ yaluOptions = {
 	"EdgeResistDelay" : {
 		"default": 0,
 		"values": [ ("None", 0) ] + [
-			("%2.1fs"%(x/100.0,), x) for x in range(10,101, 10)
+			("%2.1fs"%(x/1000.0,), x) for x in range(100,1001, 100)
 		] + [
 			None,
 			("Custom", None, "How long should the delay (in ms) be before the screen changes page?")
 		]
 	},
-	"DeleyAxitTime" : {
+	"DeleyExitTime" : {
 		"default": 30,
 		"values": [
 			("Do not keep open", 0),
@@ -180,7 +181,7 @@ yaluOptions = {
 		"default": "frequent",
 		"values": [
 			("Frequently Used", "frequent"),
-			("Recently Used", "Recent"),
+			("Recently Used", "recent"),
 		]
 	},
 	"Theme" : {
@@ -197,6 +198,10 @@ yaluOptions = {
 		]
 	},
 } # yaluOptions {}
+
+################################################################################
+# Option file interface.                                                       #
+################################################################################
 
 def FvwmCommand(command):
 	command = command.replace("\"","\\\"")
@@ -255,11 +260,25 @@ class Option(object):
 		# Save the new config
 		open(self.configFile, "w").write(config)
 
-os.chdir(os.environ["LocalYALU"])
+################################################################################
+# Commandline behaviour.                                                       #
+################################################################################
 
-test = Option("SnapDistance")
-print test.name
-print test.value
-print test.default
-
-test.value = 10
+if __name__ == "__main__":
+	# Move into the YALU dir so that all paths from now on can be relative
+	os.chdir(os.environ["LocalYALU"])
+	
+	if len(sys.argv) == 1:
+		print "Available options:"
+		for option in yaluOptions:
+			print option
+	elif len(sys.argv) == 2:
+		selectedOption = Option(sys.argv[1])
+		print selectedOption.value
+		print "Default:", selectedOption.default
+	elif len(sys.argv) == 3:
+		selectedOption = Option(sys.argv[1])
+		selectedOption.value = str(sys.argv[2])
+	else:
+		sys.stderr.write("Invalid arguments\n")
+		sys.stderr.write("Usage: yaluConfig [optionName [newValue]]\n")

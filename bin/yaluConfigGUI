@@ -12,7 +12,7 @@
 #   Sets an option using yaluConfig based on input from zenity. Syntax:
 #      yaluConfigGUI option prompt
 
-currentConfig="$("$YALU/bin/yaluConfig" "$1")"
+currentConfig="$("$YALU/bin/yaluConfig.py" "$1")"
 currentValue="$(echo "$currentConfig" | head -n1)"
 default="$(echo "$currentConfig" | tail -n1)"
 
@@ -21,6 +21,6 @@ if newValue="$(zenity \
 	--title="YetAnotherLevelUp" \
 	--text="$2\n$default" \
 	--entry-text="$currentValue")"; then
-	"$YALU/bin/yaluConfig" "$1" "$newValue"
+	"$YALU/bin/yaluConfig.py" "$1" "$newValue"
 fi
 

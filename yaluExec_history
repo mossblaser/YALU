@@ -72,3 +72,78 @@ xterm -r
 xterm -r 
 xterm -r 
 xterm -r 
+xterm -r 
+xterm -r 
+chromium 
+xterm -r 
+xterm -r 
+xterm -r 
+xterm -r 
+gvim 
+
+xmodmap .Xmodmap 
+xterm -r 
+xterm -r 
+xterm -r 
+chromium 
+gvim 
+xterm -r 
+skype 
+xterm -r 
+chromium 
+chromium 
+xterm -r 
+chromium 
+xterm -r 
+xterm -r 
+changeWall.sh 
+gvim 
+xterm 
+xmodmap .Xmodmap 
+xterm 
+xclock 
+xlock 
+xterm -r 
+xterm -r 
+xterm -r 
+nautilus --no-desktop 
+xclock 
+xclock 
+xclock 
+xclock 
+xmessage Hello\,\'\ -buttons\'\ \$hi -timeout 4 
+xclock 
+chromium 
+xterm -r 
+chromium 
+xterm -r 
+xterm -r 
+xterm -r 
+xterm -r 
+xterm -r 
+xterm -r 
+xterm -r 
+gvim 
+xterm -e vim 
+xterm 
+xterm -e vim 
+xterm 
+xterm -e vim 
+xterm -e vi 
+xterm 
+emacs 
+xterm 
+xterm 
+xterm 
+xterm 
+xterm 
+gvim 
+changeWall.sh 
+xterm 
+xterm 
+gvim 
+xterm -e vim 
+xterm 
+xterm 
+xmodmap .Xmodmap 
+xterm 
