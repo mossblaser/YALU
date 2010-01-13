@@ -1,0 +1,149 @@
+#!/bin/bash
+ ##############################################################################
+################################################################################
+####            YetAnotherLevelUp (YALU), an FVWM Configuration             ####
+####               ~ Jonathan Heathcote                                     ####
+####               ~ September 2009 - Present                               ####
+####               ~ GNU GPLv3                                              ####
+################################################################################
+ ##############################################################################
+# yaluWallpaper:
+#   Manages and sets wallpapers on a per-desk or page basis.
+#      yaluWallpaper [command] [...]
+#   Commands are:
+#      init: Set the wallpaper for this desk (forced)
+#      set [{desk,page}] {[{scale,center,tile,seamless}] {imageFile, directory}, #      color #colour:
+#         Sets the wallpaper for the desk, page or globally (if not specified).
+#         Displays the image in the specified style (smartTile will make any
+#         image tile smoothly). If you specify a file this will be used, if you
+#         specify a directory then a random image will be used from that
+#         directory.
+
+# The directory where wallpapers are kept (without trailing slash)
+wallpaperDir="$LocalYALU/wallpaper"
+
+# Get the absolute path of the image for the provided desk, pagex pagey
+# If return code is 0, "type:{image,colour}" has been printed
+# Otherwise, an error has occured!
+function getBackground {
+	# Search image paths, each time being less precise
+	for backgroundLocation in "/desk$1/page$2x$3" "/desk$1" "/"; do
+		# Search for each background type
+		for backgroundType in "scale" "center" "tile" "seamless" "colour"; do
+			thisSearch="$wallpaperDir$backgroundLocation/$backgroundType"
+			if [ "$backgroundType" == "colour" ]; then
+				# Looking for a colour file
+				if [ -f "$thisSearch" ]; then
+					echo -n "colour:"
+					cat "$thisSearch"
+					return 0
+				fi
+			else
+				# Looking for images
+				if [ -f "$thisSearch" ]; then
+					# Print image type and the image address
+					echo -n "$backgroundType:"
+					readlink -f "$thisSearch"
+					return 0
+				elif [ -d "$thisSearch" ]; then
+					# List images in this directory which end in the appropriate extension
+					# (hiding any errors from ls if a particular extension doesn't have any
+					# files) and randomize and pick one.
+					randomImage="$(
+						ls "$(readlink -fn "$thisSearch")"/*{.png,.jpg,.tif,.tiff,.bmp,.xpm,.PNG,.JPG,.TIF,.TIFF,.BMP,.XPM} \
+						2>/dev/null | sort -R | head -n1
+					)"
+					if [ -n "$randomImage" ]; then
+						# Print image type and the image address
+						echo "$backgroundType:$randomImage"
+						return 0
+					fi
+				fi
+			fi
+		done
+	done
+	# No background was found
+	return 2
+} # function getBackground
+
+# Sets the wallpaper
+# If the force argument is passed it will set the wallpaper regardless of
+# whether it needs to be or not
+function applyWall {
+	# Only take action if forced or if the image is different
+	oldBackground="$(getBackground "$yaluOldDesk" "$yaluOldPageX" "$yaluOldPageY")"
+	newBackground="$(getBackground "$yaluDesk" "$yaluPageX" "$yaluPageY")"
+	if [ "$1" == "force" -o \
+			"$oldBackground" != "$newBackground" ]; then
+		
+		# Get the type and value
+		oldIFS="$IFS"
+		IFS=":"
+		newBackground=($newBackground)
+		bgType="${newBackground[0]}"
+		bgValue="${newBackground[1]}"
+		IFS="$oldIFS"
+		
+		# Set the background
+		if [ "$bgType" == "colour" ]; then
+			xsetroot -solid "$bgValue"
+		else
+			feh --bg-`echo "$bgType"` "$bgValue"
+		fi
+		echo "Changed wallpaper!" 1>&2
+	else
+		echo "Keeping old background (use yaluWallpaper init to force change)" 1>&2
+	fi
+} # function applyWall
+
+# Sets a wallpaper dependent on a number of arguments:
+function setWall {
+	# If a desk/page was specified...
+	case "$1" in
+		"desk")
+			wallpaperDir="$wallpaperDir/desk$yaluDesk"
+			toDelete="$wallpaperDir/*"
+			shift ;;
+		"page")
+			wallpaperDir="$wallpaperDir/desk$yaluDesk/page${yaluPageX}x${yaluPageY}"
+			shift ;;
+	esac
+	
+	echo $wallpaperDir
+	
+	# If a valid option
+	if [ "$1" == "scale" -o \
+	     "$1" == "center" -o \
+		   "$1" == "tile" -o \
+		   "$1" == "seamless" -o \
+		   "$1" == "colour" ]; then
+		# Make sure the directory exists
+		mkdir -p "$wallpaperDir/"
+		
+		# Remove any sub-directories or settings (this option will over-ride them
+		if [ -n "$wallpaperDir" ]; then # Safety
+			rm -rf "$wallpaperDir/"*
+		fi
+	fi
+	
+	case "$1" in
+		("scale"|"center"|"tile"|"seamless")
+			ln -s "`readlink -f "$2"`" "$wallpaperDir/$1"
+			FvwmCommand "YaluWallpaper init" ;;
+		"colour")
+			echo "$2" > "$wallpaperDir/colour"
+			FvwmCommand "YaluWallpaper init" ;;
+		*)
+			echo "That is not a valid command!" 1>&2
+	esac
+	
+	
+} # function setWall
+
+case "$1" in
+	"init") applyWall force ;;
+	"set")
+		shift 1
+		setWall "$@" ;;
+	*) applyWall echo ;;
+esac

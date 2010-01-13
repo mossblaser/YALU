@@ -147,3 +147,82 @@ xterm
 xterm 
 xmodmap .Xmodmap 
 xterm 
+changeWall.sh 
+chromium 
+changeWall.sh 
+chromium 
+gnome-volume-control 
+nautilus --no-desktop 
+chromium 
+gnome-volume-control 
+gnome-volume-control 
+gnome-volume-control 
+gnome-volume-control 
+inkscape 
+chromium 
+xterm 
+xterm -e vim 
+xmodmap .Xmodmap 
+xterm 
+inkscape 
+xterm 
+xterm 
+inkscape 
+chromium 
+xterm 
+changeWall.sh 
+nautilus --no-desktop 
+xterm 
+chromium 
+scribus 
+xterm 
+xterm 
+chromium 
+gnome-volume-control 
+inkscape 
+xmodmap .Xmodmap 
+chromium 
+
+
+eog Desktop/MU0_colour.png 
+xterm 
+gimp 
+xterm 
+chromium 
+gvim 
+chromium 
+inkscape 
+xterm 
+xterm 
+xterm 
+xterm 
+xterm 
+xterm 
+xterm 
+xterm 
+xterm 
+xterm 
+xterm 
+chromium 
+nautilus --no-desktop 
+xterm 
+xterm 
+xterm 
+xterm 
+xterm 
+xterm 
+xterm 
+xterm 
+xterm 
+xterm 
+xterm 
+xterm 
+xterm 
+xterm 
+xterm 
+xterm 
+xterm 
+xterm 
+xterm 
+xterm 
+xterm 

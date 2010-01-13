@@ -232,6 +232,12 @@
 	AddToFunc YaluExec
 		+ I Exec exec "$[YALU]/bin/yaluExec" $*
 	
+	### Wallpaper Management ###
+	# [Todo: Syntax guide]
+	DestroyFunc YaluWallpaper
+	AddToFunc YaluWallpaper
+		+ I Exec exec "$[YALU]/bin/yaluWallpaper" $*
+	
 	# This function is expected by yaluConfig however it doesn't need to do
 	# anything
 	DestroyFunc setDelayExitTime
@@ -728,3 +734,30 @@
 	
 	### Middle click to force a rearange (kindof debugging feature) ###
 	Mouse 2 I N rearangeIcons
+
+################################################################################
+# Page/Desk Specific Behaviour                                                 #
+#   Set up any behaviours that are specific to each desk and page.             #
+################################################################################
+	### Setup Environment on page/desk change ###
+	DestroyFunc onPageChange
+	AddToFunc onPageChange
+		# Remember old values (so wallpaper doesn't need to be changed if the same)
+		+ I SetEnv yaluOldDesk $[yaluDesk]
+		+ I SetEnv yaluOldPageX $[yaluPageX]
+		+ I SetEnv yaluOldPageY $[yaluPageY]
+		# Store new values in exernally accesaable variable
+		+ I SetEnv yaluDesk $[desk.n]
+		+ I SetEnv yaluPageX $[page.nx]
+		+ I SetEnv yaluPageY $[page.ny]
+		# Run the wallpaper manager
+		+ I YaluWallpaper
+	
+	### Use FvwmBacker to monitor when desk/page changes
+	AddToFunc setDeskSpecificBehaviour
+		+ I Module FvwmBacker
+		+ I *FvwmBacker: Command (Desk *, Page * *) onPageChange
+		# Initialise the wallpaper manager
+		+ I YaluWallpaper init
+	
+	setDeskSpecificBehaviour
