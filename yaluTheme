@@ -1,0 +1,101 @@
+ ##############################################################################
+################################################################################
+####            YetAnotherLevelUp (YALU), an FVWM Configuration             ####
+####               ~ Jonathan Heathcote                                     ####
+####               ~ September 2009 - Present                               ####
+####               ~ GNU GPLv3                                              ####
+################################################################################
+ ##############################################################################
+#
+# yaluTheme -- default:
+#   User configurable theme file. This file will normally be a copy or symlink
+#   to a theme file in the the theme library. This file contains a heavily
+#   commented version of the 'default' theme for YALU.
+
+################################################################################
+# Icon set                                                                     #
+################################################################################
+	setIconSet "default"
+
+################################################################################
+# Colourscheme                                                                 #
+################################################################################
+	### Window Colours ###
+	# Default [focused] window colours
+	Colorset 0 bg #AAAAAA, fg #000000
+	# Default [inactive] window colours
+	Colorset 1 bg #555555, fg #AAAAAA
+	
+	### Panels and Module Colours ###
+	Colorset 2 bg #000000, fg #ffffff
+	
+	### Window-Specific Colours ###
+	# Editor
+		# focused
+		Colorset 10 bg #84ea9c, fg #000000
+		# inactive
+		Colorset 11 bg #056b00, fg #64d57f
+	# Terminal
+		# focused
+		Colorset 12 bg #d4a8a8, fg #000000
+		# inactive
+		Colorset 13 bg #9d1212, fg #d4a8a8
+	# Web-browser
+		# focused
+		Colorset 14 bg #a4abe1, fg #000000
+		# inactive
+		Colorset 15 bg #0d1b85, fg #a4abe1
+	# Chat
+		# focused
+		Colorset 16 bg #e8ceb8, fg #000000
+		# inactive
+		Colorset 17 bg #c15b00, fg #e8ceb8
+	# Multimedia
+		# focused
+		Colorset 18 bg #b1f3ea, fg #000000
+		# inactive
+		Colorset 19 bg #00766a, fg #b1f3ea
+	# Graphics
+		# focused
+		Colorset 20 bg #d2a9e7, fg #000000
+		# inactive
+		Colorset 21 bg #49086a, fg #d2a9e7
+	
+	### Menu Colours ###
+	# Defaults
+	MenuStyle * Background Grey20
+	MenuStyle * Foreground White
+	MenuStyle * HilightBack Grey40
+
+################################################################################
+# Windows                                                                      #
+################################################################################
+	### Window Borders ###
+	# Make resizeable windows have a 4px border
+	Style * HandleWidth 4
+	# Make fixed windows have a 1px border
+	Style * BorderWidth 1
+	# Make Window borders depress when clicked
+	Style * DepressableBorder
+	# Decorate dialogues too
+	Style * DecorateTransient
+	
+	### Window Titles/Buttons ###
+	# Set icons
+	setButtonIcon 2 "close"
+	setButtonIcon 4 "maximize"
+	setButtonIcon 6 "minimize"
+	# Make Window Buttons flat
+	ButtonStyle All ActiveUp -- Flat
+	ButtonStyle All Inactive -- Flat
+	# Make Window Titles flat
+	TitleStyle ActiveUp -- Flat
+	TitleStyle Inactive -- Flat
+
+################################################################################
+# Menus                                                                        #
+################################################################################
+	MenuStyle * BorderWidth 0
+	MenuStyle * Hilight3DOff
+	MenuStyle * PopupImmediately
+	MenuStyle * PopupOffset -12 100 # Don't overlap menus

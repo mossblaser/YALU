@@ -66,11 +66,12 @@ yaluOptions = {
 		"values": [
 			("FireFox", "firefox"),
 			None,
-			("Google Chrome", "google-chrome"),
-			("Chromium", "chromium"),
-			None,
 			("Konqueror", "konqueror"),
 			("Epiphany", "epiphany"),
+			None,
+			("Google Chrome", "google-chrome"),
+			("Chromium", "chromium"),
+			("Opera", "opera"),
 			None,
 			("Custom", None, "Please enter your choice of web browser."),
 		]
@@ -184,10 +185,11 @@ yaluOptions = {
 			("Recently Used", "recent"),
 		]
 	},
-	"Theme" : {
-		"default": "default",
+	"WindowTypeColours" : {
+		"default": "",
 		"values": [
-			("YALU defaultTheme", " default"),
+			("Enabled", ""),
+			("Disabled", "Nop"),
 		]
 	},
 	"ImageType" : {

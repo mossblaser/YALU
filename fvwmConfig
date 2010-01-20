@@ -46,16 +46,21 @@
 	SetEnv LocalYALU "$[HOME]/.yalu"
 
 	### Load user configuration ###
-	Read "$[YALU]/yaluConfig"
+	Read "$[LocalYALU]/yaluConfig"
 
 	### Set the path for icons ###
 	# Note that here images are limited to a user-specified file type, this means
 	# that if the user's FVWM install doesn't support PNG they can simply choose
 	# to use XPM all the time (or if it does, reap the benefits of smoother icons)
+	# Usage:
+	#   setIconSet [icon set name]
+	DestroyFunc setIconSet
+	AddToFunc setIconSet
+		+ I ImagePath $[YALU]/themes/$0/icons;.$[yaluImageType]
+		+ I ImagePath +:$[YALU]/icons/;.$[yaluImageType]
+	
 	DestroyFunc setImageType
-	AddToFunc setImageType
-		+ I ImagePath $[YALU]/themes/$[yaluTheme]/icons;.$[yaluImageType]:$[YALU]/icons/;.$[yaluImageType]:+
-	setImageType
+	AddToFunc setImageType I setIconSet
 	
 	### Clean up default functions ###
 	DestroyFunc StartFunction
@@ -87,9 +92,9 @@
 	DestroyFunc setButtonIcon
 	AddToFunc setButtonIcon
 		+ I ButtonStyle $0 Pixmap "clear"
-		+ I AddButtonStyle $0 ActiveUp Pixmap "$1Button" -- Flat
-		+ I AddButtonStyle $0 ActiveDown Pixmap "$1Button" -- Flat
-		+ I AddButtonStyle $0 Inactive Pixmap "$1ButtonGrey" -- Flat
+		+ I AddButtonStyle $0 ActiveUp Pixmap "$1Button"
+		+ I AddButtonStyle $0 ActiveDown Pixmap "$1Button"
+		+ I AddButtonStyle $0 Inactive Pixmap "$1ButtonGrey"
 	
 	### Present an editor for the launcher ###
 	# Presently this just launches a text editor, in the future this could be a
@@ -188,6 +193,75 @@
 	AddToFunc throwDown
 		+ I	AnimatedMove w -0 Warp
 	
+	### Set the style for a category of windows ###
+	# Usage:
+	#   setGroupStyle [group] [fvwm style commands]
+	DestroyFunc setGroupStyle
+	AddToFunc setGroupStyle
+		+ I setGroupStyle$*
+	
+	DestroyFunc setGroupStyleEditor
+	AddToFunc setGroupStyleEditor
+		+ I Style "gvim" $*
+		+ I Style "Emacs" $*
+		+ I Style "Nedit" $*
+		+ I Style "Kate" $*
+		+ I Style "Gedit" $*
+	
+	DestroyFunc setGroupStyleTerminal
+	AddToFunc setGroupStyleTerminal
+		+ I Style "xterm" $*
+		+ I Style "Gnome-terminal" $*
+		+ I Style "Konsole" $*
+		+ I Style "aterm" $*
+		+ I Style "eterm" $*
+		+ I Style "rxvt" $*
+	
+	DestroyFunc setGroupStyleBrowser
+	AddToFunc setGroupStyleBrowser
+		+ I Style "Firefox" $*
+		+ I Style "Iceweasel" $*
+		+ I Style "Navigator" $*
+		+ I Style "Konqueror" $*
+		+ I Style "Epiphany" $*
+		+ I Style "Google-chrome" $*
+		+ I Style "Chromium" $*
+		+ I Style "Opera" $*
+	
+	DestroyFunc setGroupStyleChat
+	AddToFunc setGroupStyleChat
+		+ I Style "Skype" $*
+		+ I Style "amsn" $*
+		+ I Style "Pidgin" $*
+		+ I Style "Konversation" $*
+		+ I Style "Kopete" $*
+		+ I Style "Empathy" $*
+		+ I Style "xchat" $*
+		+ I Style "irssi" $*
+	
+	DestroyFunc setGroupStyleMultimedia
+	AddToFunc setGroupStyleMultimedia
+		+ I Style "vlc" $*
+		+ I Style "Rhythmbox" $*
+		+ I Style "Amarok" $*
+		+ I Style "Totem" $*
+		+ I Style "xine" $*
+		+ I Style "mplayer" $*
+		+ I Style "Kaffeine" $*
+		+ I Style "Noatun" $*
+		+ I Style "KPlayer" $*
+	
+	DestroyFunc setGroupStyleGraphics
+	AddToFunc setGroupStyleGraphics
+		+ I Style "inkscape" $*
+		+ I Style "gimp" $*
+		+ I Style "kriter" $*
+		+ I Style "kpaint" $*
+		+ I Style "gpaint" $*
+		+ I Style "fspot" $*
+		+ I Style "Picassa" $*
+		+ I Style "gphoto" $*
+	
 	### External Command Wrappers ###
 	
 	# (Re)generates dynamic menus using the yaluMenu script.
@@ -242,8 +316,6 @@
 	# anything
 	DestroyFunc setDelayExitTime
 	AddToFunc setDelayExitTime I Nop
-	DestroyFunc setTheme
-	AddToFunc setTheme I Nop
 
 ################################################################################
 # Pager                                                                        #
@@ -394,19 +466,16 @@
 #   What buttons should windows have and how should they look/act              #
 ################################################################################
 	### Top Right (Close) ###
-	setButtonIcon 2 "close"
 	Mouse 1 2 N abortOnDrag Close # Left-Click: Close
 	Mouse 1 2 4 abortOnDrag Delete # Super+Left-Click: Delete
 	Mouse 1 2 C abortOnDrag Destroy # Ctl+Left-Click: Destroy
 	
 	### Top Right (Maximize) ###
-	setButtonIcon 4 "maximize"
 	Mouse 1 4 N abortOnDrag Maximize # Left-Click: Maximize
 	Mouse 2 4 N abortOnDrag Maximize 100 0 # Middle-Click: Wide
 	Mouse 3 4 N abortOnDrag Maximize 0 100 # Right-Click: Tall
 	
 	### Top Right (Iconify) ###
-	setButtonIcon 6 "minimize"
 	Mouse 1 6 N abortOnDrag Iconify # Left-Click: Iconify
 	Mouse 3 6 N abortOnDrag WindowShade # Right-Click: Shade
 	
@@ -434,46 +503,11 @@
 	Mouse 0 1 N Menu windowMenu # Click
 
 ################################################################################
-# Window Borders                                                               #
-#   The general appearence of window edging.                                   #
-################################################################################
-	# Make window borders flat
-	#BorderStyle Active -- Flat
-	#BorderStyle Inactive -- Flat
-	
-	# Make resizeable windows have a 3px border
-	Style * HandleWidth 4
-	
-	# Make fixed windows have a 1px border
-	Style * BorderWidth 1
-	
-	# Make Window borders depress when clicked
-	Style * DepressableBorder
-	
-	# Decorate dialogues too
-	Style * DecorateTransient
-	
-	# Make Window Buttons flat
-	ButtonStyle All ActiveUp -- Flat
-	ButtonStyle All Inactive -- Flat
-	
-	# Make Window Titles flat
-	TitleStyle ActiveUp -- Flat
-	TitleStyle Inactive -- Flat
-
-################################################################################
 # Menus                                                                        #
 #   Define each of the different menus that can be used.                       #
 ################################################################################
-	### Define the default appearence and basic behaviour of menus ###
-	MenuStyle * BorderWidth 0
-	MenuStyle * Background Grey20
-	MenuStyle * Foreground White
-	MenuStyle * HilightBack Grey40
-	MenuStyle * Hilight3DOff
-	MenuStyle * PopupImmediately
+	### Define the basic behaviour of menus ###
 	MenuStyle * AutomaticHotkeys # Generate hotkeys where undefined
-	MenuStyle * PopupOffset -12 100 # Don't overlap menus
 	
 	### Generate all dynamic menus ###
 	YaluMenu
@@ -761,3 +795,34 @@
 		+ I YaluWallpaper init
 	
 	setDeskSpecificBehaviour
+
+################################################################################
+# Themeing                                                                     #
+#   Provide a system to allow the user to easily customize the theme of YALU.  #
+################################################################################
+	### Load the theme ###
+	DestroyFunc setTheme
+	AddToFunc setTheme
+		+ I Read "$[LocalYALU]/yaluTheme"
+		+ I Style * HilightColorset 0
+		+ I Style * Colorset 1
+		+ I $[yaluWindowTypeColours] setGroupStyle Editor HilightColorset 10
+		+ I $[yaluWindowTypeColours] setGroupStyle Editor Colorset        11
+		+ I $[yaluWindowTypeColours] setGroupStyle Terminal HilightColorset 12
+		+ I $[yaluWindowTypeColours] setGroupStyle Terminal Colorset        13
+		+ I $[yaluWindowTypeColours] setGroupStyle Browser HilightColorset 14
+		+ I $[yaluWindowTypeColours] setGroupStyle Browser Colorset        15
+		+ I $[yaluWindowTypeColours] setGroupStyle Chat HilightColorset 16
+		+ I $[yaluWindowTypeColours] setGroupStyle Chat Colorset        17
+		+ I $[yaluWindowTypeColours] setGroupStyle Multimedia HilightColorset 18
+		+ I $[yaluWindowTypeColours] setGroupStyle Multimedia Colorset        19
+		+ I $[yaluWindowTypeColours] setGroupStyle Graphics HilightColorset 20
+		+ I $[yaluWindowTypeColours] setGroupStyle Graphics Colorset        21
+	
+	### Allow user-configuration of window type colouring ###
+	DestroyFunc setWindowTypeColours
+	AddToFunc setWindowTypeColours
+		+ I setTheme
+	
+	setTheme
+

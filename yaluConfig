@@ -75,8 +75,10 @@ SetEnv yaluDelayExitTime 30
 #  "recent" or "frequent"
 SetEnv yaluExecHistoryType "frequent"
 
-# YALU Theme
-SetEnv yaluTheme "default"
+# Colourise windows by type
+#   "" to enable
+#   "Nop" to disable
+SetEnv yaluWindowTypeColours ""
 
 # File type used for icons
 SetEnv yaluImageType "png"
