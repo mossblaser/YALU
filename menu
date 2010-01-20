@@ -8,4 +8,6 @@ x&lock
 &Skype	skype
 &Pidgin	pidgin
 
+&Rhythmbox	rhythmbox
+
 Comman&d Escape Test	xmessage Hello\,\'\ -buttons\'\ \$hi -timeout 4
