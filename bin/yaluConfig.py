@@ -228,15 +228,13 @@ class Option(object):
 		self.default = str(yaluOptions[name]["default"])
 		self.values = yaluOptions[name]["values"]
 	
-	@property
-	def value(self):
+	def getValue(self):
 		try:
 			return os.environ["yalu%s"%(self.name,)]
 		except KeyError:
 			return ""
 	
-	@value.setter
-	def value(self, value):
+	def setValue(self, value):
 		# Load the config file (and store line-by-line)
 		config = open(self.configFile, "r").read()
 		
@@ -259,6 +257,7 @@ class Option(object):
 		
 		# Save the new config
 		open(self.configFile, "w").write(config)
+	value = property(getValue,setValue)
 
 ################################################################################
 # Commandline behaviour.                                                       #
