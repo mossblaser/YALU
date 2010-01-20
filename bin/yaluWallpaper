@@ -12,7 +12,8 @@
 #      yaluWallpaper [command] [...]
 #   Commands are:
 #      init: Set the wallpaper for this desk (forced)
-#      set [{desk,page}] {[{scale,center,tile,seamless}] {imageFile, directory}, #      color #colour:
+#      set [{desk,page}] {[{scale,center,tile,seamless}] {imageFile, directory},
+#      color #colour:
 #         Sets the wallpaper for the desk, page or globally (if not specified).
 #         Displays the image in the specified style (smartTile will make any
 #         image tile smoothly). If you specify a file this will be used, if you
