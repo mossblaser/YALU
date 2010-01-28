@@ -518,7 +518,7 @@
 		+ "&Programs" Popup programs
 		+ "&Windows" Popup windows
 		+ "Paging and &Desks" Popup pagingAndDesks
-		+ "&Themes" Popup themes
+		+ "&Theme" Popup theme
 		+ "" Nop
 		+ "%fvwm%&FVWM Menu" Popup MenuFvwmRoot
 		+ "" Nop
@@ -532,6 +532,7 @@
 	 + I AddToMenu programs "Program Configuration" Title
 	 + I	+ DynamicPopupAction generatePrograms
 	 + I 	+ "View Program &Output (Super+F4)" Popup execOutput
+	 + I 	+ "Keep program output for..." Popup DelayExitTimeConfig
 	 + I 	+ "" Nop
 	 + I 	+ "Edit &Launcher" editLauncher
 	 + I 	+ "Change &Terminal Program ($[yaluTerminal])" Popup TerminalConfig
@@ -562,6 +563,14 @@
 		+ "Horizontal Screen Edge Jump Size" Popup edgeJumpWidthConfig
 		+ "Vertical Screen Edge Jump Size" Popup edgeJumpHeightConfig
 		+ "Edge Jump Delay" Popup edgeResistDelayConfig
+	
+	### Theme (Config) Menu ###
+	DestroyMenu theme
+	AddToMenu theme "Theme Configuration" Title
+		+ "Select Theme" Popup themeConfig
+		+ "Theme Configuration" Popup ThisThemeMenu
+		+ "" Nop
+		+ "Colourize Windows by Category" Popup WindowTypeColoursConfig
 	
 	### Window Menu ###
 	DestroyFunc buildWindowMenu
@@ -803,21 +812,24 @@
 	### Load the theme ###
 	DestroyFunc setTheme
 	AddToFunc setTheme
-		+ I Read "$[LocalYALU]/yaluTheme"
+		# Load theme file
+		+ I Read "$[yaluTheme]"
+		# Set default window colours
 		+ I Style * HilightColorset 0
 		+ I Style * Colorset 1
+		# Set colour for application types
 		+ I $[yaluWindowTypeColours] setGroupStyle Editor HilightColorset 10
-		+ I $[yaluWindowTypeColours] setGroupStyle Editor Colorset        11
+		+ I $[yaluWindowTypeColours] setGroupStyle Editor Colorset 11
 		+ I $[yaluWindowTypeColours] setGroupStyle Terminal HilightColorset 12
-		+ I $[yaluWindowTypeColours] setGroupStyle Terminal Colorset        13
+		+ I $[yaluWindowTypeColours] setGroupStyle Terminal Colorset 13
 		+ I $[yaluWindowTypeColours] setGroupStyle Browser HilightColorset 14
-		+ I $[yaluWindowTypeColours] setGroupStyle Browser Colorset        15
+		+ I $[yaluWindowTypeColours] setGroupStyle Browser Colorset 15
 		+ I $[yaluWindowTypeColours] setGroupStyle Chat HilightColorset 16
-		+ I $[yaluWindowTypeColours] setGroupStyle Chat Colorset        17
+		+ I $[yaluWindowTypeColours] setGroupStyle Chat Colorset 17
 		+ I $[yaluWindowTypeColours] setGroupStyle Multimedia HilightColorset 18
-		+ I $[yaluWindowTypeColours] setGroupStyle Multimedia Colorset        19
+		+ I $[yaluWindowTypeColours] setGroupStyle Multimedia Colorset 19
 		+ I $[yaluWindowTypeColours] setGroupStyle Graphics HilightColorset 20
-		+ I $[yaluWindowTypeColours] setGroupStyle Graphics Colorset        21
+		+ I $[yaluWindowTypeColours] setGroupStyle Graphics Colorset 21
 	
 	### Allow user-configuration of window type colouring ###
 	DestroyFunc setWindowTypeColours

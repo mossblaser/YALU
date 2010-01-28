@@ -23,12 +23,15 @@ import sys, os, commands, re
 #   follows:                                                                   #
 #   {                                                                          #
 #      " default": " defaultValue",                                            #
-#      "values": [ (label, value), None,... ]                                  #
+#      "values": [ (label, value), None,... ],                                 #
+#      "directories": [ "dirName", None,... ]                                  #
 #   }                                                                          #
 #   All values are strings. If a value is set to None the user will be         #
 #   prompted with a graphical dialogue offering to select a custom value. A    #
 #   custom prompt can be specified by adding a third element to the tuple. If  #
-#   a label/value pair is replaced with None a seperator is inserted.          #
+#   a label/value pair is replaced with None a seperator is inserted. If       #
+#   directories is set then a list of directories to list the files in is      #
+#   specified.                                                                 #
 ################################################################################
 
 yaluOptions = {
@@ -166,10 +169,10 @@ yaluOptions = {
 			("Custom", None, "How long should the delay (in ms) be before the screen changes page?")
 		]
 	},
-	"DeleyExitTime" : {
+	"DelayExitTime" : {
 		"default": 30,
 		"values": [
-			("Do not keep open", 0),
+			("Do not keep", 0),
 		] + [ ("%isecs"%(x,), x) for x in range(5, 21, 5) + range(30, 60, 10)] + [
 			("1min", 60),
 			("2mins", 2*60),
@@ -197,6 +200,14 @@ yaluOptions = {
 		"values": [
 			("High-Quality (PNG)", "png"),
 			("Low-Quality (XPM)", "xpm"),
+		]
+	},
+	"Theme" : {
+		"default": "default",
+		"directories": [
+			"%s/themes/"%(os.environ["LocalYALU"],),
+			None,
+			"%s/themes/"%(os.environ["YALU"],),
 		]
 	},
 } # yaluOptions {}
@@ -228,7 +239,27 @@ class Option(object):
 			raise OptionDoesNotExist()
 		
 		self.default = str(yaluOptions[name]["default"])
-		self.values = yaluOptions[name]["values"]
+	
+	def getValues(self):
+		global yaluOptions
+		if yaluOptions[self.name].has_key("values"):
+			return yaluOptions[self.name]["values"]
+		elif yaluOptions[self.name].has_key("directories"):
+			values = []
+			print yaluOptions[self.name]["directories"]
+			for directory in yaluOptions[self.name]["directories"]:
+				if directory != None:
+					try:
+						values.extend([
+							(filename, os.path.join(directory, filename)) for filename in os.listdir(directory)
+						])
+					except:
+						pass
+				else:
+					values.append(None)
+			return values
+	
+	values = property(getValues)
 	
 	def getValue(self):
 		try:

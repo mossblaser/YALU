@@ -83,3 +83,5 @@ SetEnv yaluWindowTypeColours ""
 # File type used for icons
 SetEnv yaluImageType "png"
 
+# The name of the theme to use
+SetEnv yaluTheme "/home/jonathan/.yalu/themes/default"

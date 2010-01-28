@@ -70,13 +70,13 @@
 ################################################################################
 # Windows                                                                      #
 ################################################################################
-	### Window Borders ###
-	# Make resizeable windows have a 4px border
+	# Set window border width
 	Style * HandleWidth 4
-	# Make fixed windows have a 1px border
-	Style * BorderWidth 1
+	Style * BorderWidth 0
+	
 	# Make Window borders depress when clicked
 	Style * DepressableBorder
+	
 	# Decorate dialogues too
 	Style * DecorateTransient
 	
@@ -99,3 +99,13 @@
 	MenuStyle * Hilight3DOff
 	MenuStyle * PopupImmediately
 	MenuStyle * PopupOffset -12 100 # Don't overlap menus
+
+################################################################################
+# Theme Menu                                                                   #
+################################################################################
+	DestroyMenu ThisThemeMenu
+	AddToMenu ThisThemeMenu "YALU Default Theme" Title
+	 + "Theme by Jonathan Heathcote" Nop
+	 + "A minimal theme which provides just the basics" Nop
+	 + "" Nop
+	 + "No Configuration Settings Available..." Nop
