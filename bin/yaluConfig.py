@@ -203,11 +203,22 @@ yaluOptions = {
 		]
 	},
 	"Theme" : {
-		"default": "default",
+		"default": os.path.join(os.environ["YALU"], "themes", "default"),
 		"directories": [
 			"%s/themes/"%(os.environ["LocalYALU"],),
 			None,
 			"%s/themes/"%(os.environ["YALU"],),
+		]
+	},
+	"AutoRaise" : {
+		"default": "-1",
+		"values": [
+			("Disabled", "-1"),
+			None,
+		] + [
+			(
+				"%1.1fsecs"%(x/10.0,), str(x*100)
+			) for x in range(0, 11, 1)
 		]
 	},
 } # yaluOptions {}

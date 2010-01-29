@@ -459,7 +459,31 @@
 	# Required function by yaluConfig -- doesn't need to do anything
 	DestroyFunc setResizeCorner
 	AddToFunc setResizeCorner I Nop
-
+	
+	AddToFunc DoAbsoluteyNothing
+		+ I Nop
+	
+	# Auto-Raise
+	DestroyFunc setAutoRaise
+	AddToFunc setAutoRaise
+		+ I KillModule FvwmAuto
+		+ I FvwmAuto $[yaluAutoRaise] "Silent Raise"
+	setAutoRaise
+	
+	
+################################################################################
+# Inteligent Tiling                                                            #
+#   Add tiling-wm like functionality to YALU like auto-fitting a window to a   #
+#   space on screen.                                                           #
+################################################################################
+	DestroyFunc InteliTile
+	AddToFunc InteliTile
+		+ I PipeRead "$[YALU]/bin/yaluInteliTile.py init $[vp.width] $[vp.height]"
+		+ I Iconify True
+		+ I All (CurrentPage,!Iconic,Visible) \
+		    PipeRead "$[YALU]/bin/yaluInteliTile.py add $[yaluInteliTileID] $[w.x] $[w.y] $[w.width] $[w.height]"
+		+ I Iconify False
+		+ I PipeRead "$[YALU]/bin/yaluInteliTile.py place $[yaluInteliTileID] $[w.x] $[w.y] $[w.width] $[w.height]"
 
 ################################################################################
 # Window Buttons                                                               #
@@ -506,108 +530,115 @@
 # Menus                                                                        #
 #   Define each of the different menus that can be used.                       #
 ################################################################################
-	### Define the basic behaviour of menus ###
-	MenuStyle * AutomaticHotkeys # Generate hotkeys where undefined
-	
-	### Generate all dynamic menus ###
-	YaluMenu
-	
-	### YALU Configuration Menu ###
-	DestroyMenu yaluConfiguration
-	AddToMenu yaluConfiguration "YALU Configuration" Title
-		+ "&Programs" Popup programs
-		+ "&Windows" Popup windows
-		+ "Paging and &Desks" Popup pagingAndDesks
-		+ "&Theme" Popup theme
-		+ "" Nop
-		+ "%fvwm%&FVWM Menu" Popup MenuFvwmRoot
-		+ "" Nop
-		+ "%restart%&Restart" Restart
-		+ "%quit%&Quit" Quit
-	
-	### Programs (Config) Menu ###
-	DestroyFunc generatePrograms
-	AddToFunc generatePrograms
-	 + I DestroyMenu programs
-	 + I AddToMenu programs "Program Configuration" Title
-	 + I	+ DynamicPopupAction generatePrograms
-	 + I 	+ "View Program &Output (Super+F4)" Popup execOutput
-	 + I 	+ "Keep program output for..." Popup DelayExitTimeConfig
-	 + I 	+ "" Nop
-	 + I 	+ "Edit &Launcher" editLauncher
-	 + I 	+ "Change &Terminal Program ($[yaluTerminal])" Popup TerminalConfig
-	 + I 	+ "Change Text &Editor ($[yaluEditor])" Popup EditorConfig
-	 + I 	+ "Change &Web Browser ($[yaluBrowser])" Popup BrowserConfig
-	 + I 	+ "" Nop
-	 + I 	+ "Program Usage &History (Super+F3)" Popup execHistory
-	 + I 	+ "&Sort History By..." Popup execHistoryTypeConfig
-	 + I 	+ "%clearHistory%&Clear History" clearExecHistory
-	generatePrograms
-	
-	### Windows (Config) Menu ###
-	DestroyMenu windows
-	AddToMenu windows "Window Configuration" Title
-		+ "Window Placement" Popup placeModeConfig
-		+ "Window Snapping" Popup snapDistanceConfig
-		+ "Window Focus Mode" Popup focusModeConfig
-		+ "Alt-Resize Corner" Popup resizeCornerConfig
-	
-	### Paging/Desk (Config) Menu ###
-	DestroyMenu pagingAndDesks
-	AddToMenu pagingAndDesks "Paging and Desk Configuration" Title
-		+ "Number of Desks" Popup desksConfig
-		+ "" Nop
-		+ "Horizontal Pages Per Desk" Popup deskWidthConfig
-		+ "Vertical Pages Per Desk" Popup deskHeightConfig
-		+ "" Nop
-		+ "Horizontal Screen Edge Jump Size" Popup edgeJumpWidthConfig
-		+ "Vertical Screen Edge Jump Size" Popup edgeJumpHeightConfig
-		+ "Edge Jump Delay" Popup edgeResistDelayConfig
-	
-	### Theme (Config) Menu ###
-	DestroyMenu theme
-	AddToMenu theme "Theme Configuration" Title
-		+ "Select Theme" Popup themeConfig
-		+ "Theme Configuration" Popup ThisThemeMenu
-		+ "" Nop
-		+ "Colourize Windows by Category" Popup WindowTypeColoursConfig
-	
-	### Window Menu ###
-	DestroyFunc buildWindowMenu
-	AddToFunc buildWindowMenu
-		+ I DestroyMenu windowMenu
-		+ I AddToMenu windowMenu
-		+ I 	+ DynamicPopupAction buildWindowMenu
-		+ I 	+ "$[w.name]" Title
-		+ I 	+ "Window Name: $[w.name] ($[w.iconname])" Nop
-		+ I 	+ "Window Class: $[w.class]" Nop
-		+ I 	+ "Window ID: $[w.id]" Nop
-		+ I 	+ "Window Resource: $[w.resource]" Nop
+	DestroyFunc reloadAllMenus
+	AddToFunc reloadAllMenus
+		+ I ### Define the basic behaviour of menus ###
+		+ I MenuStyle * AutomaticHotkeys # Generate hotkeys where undefined
+		+ I 
+		+ I ### Generate all dynamic menus ###
+		+ I YaluMenu
+		+ I 
+		+ I ### YALU Configuration Menu ###
+		+ I DestroyMenu yaluConfiguration
+		+ I AddToMenu yaluConfiguration "YALU Configuration" Title
+		+ I 	+ "&Programs" Popup programs
+		+ I 	+ "&Windows" Popup windows
+		+ I 	+ "Paging and &Desks" Popup pagingAndDesks
+		+ I 	+ "&Theme" Popup theme
 		+ I 	+ "" Nop
-		+ I 	+ "Window Coordinates: $[w.x], $[w.y]" Nop
-		+ I 	+ "Window Size: $[w.width]x$[w.height]" Nop
+		+ I 	+ "%fvwm%&FVWM Menu" Popup MenuFvwmRoot
 		+ I 	+ "" Nop
-		+ I 	+ "Current Page: $[page.nx], $[page.ny]" Nop
-		+ I 	+ "Current Desk: $[desk.n]" Nop
+		+ I 	+ "%restart%&Restart" Restart
+		+ I 	+ "%quit%&Quit" Quit
+		+ I 
+		+ I ### Programs (Config) Menu ###
+		+ I DestroyFunc generatePrograms
+		+ I AddToFunc generatePrograms
+		+ I  + I DestroyMenu programs
+		+ I  + I AddToMenu programs "Program Configuration" Title
+		+ I  + I	+ DynamicPopupAction generatePrograms
+		+ I  + I 	+ "View Program &Output (Super+F4)" Popup execOutput
+		+ I  + I 	+ "Keep program output for..." Popup DelayExitTimeConfig
+		+ I  + I 	+ "" Nop
+		+ I  + I 	+ "Edit &Launcher" editLauncher
+		+ I  + I 	+ "Change &Terminal Program ($[yaluTerminal])" Popup TerminalConfig
+		+ I  + I 	+ "Change Text &Editor ($[yaluEditor])" Popup EditorConfig
+		+ I  + I 	+ "Change &Web Browser ($[yaluBrowser])" Popup BrowserConfig
+		+ I  + I 	+ "" Nop
+		+ I  + I 	+ "Program Usage &History (Super+F3)" Popup execHistory
+		+ I  + I 	+ "&Sort History By..." Popup execHistoryTypeConfig
+		+ I  + I 	+ "%clearHistory%&Clear History" clearExecHistory
+		+ I generatePrograms
+		+ I 
+		+ I ### Windows (Config) Menu ###
+		+ I DestroyMenu windows
+		+ I AddToMenu windows "Window Configuration" Title
+		+ I 	+ "Window Placement" Popup placeModeConfig
+		+ I 	+ "Window Snapping" Popup snapDistanceConfig
+		+ I 	+ "Window Focus Mode" Popup focusModeConfig
 		+ I 	+ "" Nop
-		+ I 	+ "Useful Things Coming soon..." -
-	buildWindowMenu
+		+ I 	+ "Auto-Raise" Popup autoRaiseConfig
+		+ I 	+ "" Nop
+		+ I 	+ "Alt-Resize Corner" Popup resizeCornerConfig
+		+ I 
+		+ I ### Paging/Desk (Config) Menu ###
+		+ I DestroyMenu pagingAndDesks
+		+ I AddToMenu pagingAndDesks "Paging and Desk Configuration" Title
+		+ I 	+ "Number of Desks" Popup desksConfig
+		+ I 	+ "" Nop
+		+ I 	+ "Horizontal Pages Per Desk" Popup deskWidthConfig
+		+ I 	+ "Vertical Pages Per Desk" Popup deskHeightConfig
+		+ I 	+ "" Nop
+		+ I 	+ "Horizontal Screen Edge Jump Size" Popup edgeJumpWidthConfig
+		+ I 	+ "Vertical Screen Edge Jump Size" Popup edgeJumpHeightConfig
+		+ I 	+ "Edge Jump Delay" Popup edgeResistDelayConfig
+		+ I 
+		+ I ### Theme (Config) Menu ###
+		+ I DestroyMenu theme
+		+ I AddToMenu theme "Theme Configuration" Title
+		+ I 	+ "Select Theme" Popup themeConfig
+		+ I 	+ "Theme Configuration" Popup ThisThemeMenu
+		+ I 	+ "" Nop
+		+ I 	+ "Colourize Windows by Category" Popup WindowTypeColoursConfig
+		+ I 
+		+ I ### Window Menu ###
+		+ I DestroyFunc buildWindowMenu
+		+ I AddToFunc buildWindowMenu
+		+ I 	+ I DestroyMenu windowMenu
+		+ I 	+ I AddToMenu windowMenu
+		+ I 	+ I 	+ DynamicPopupAction buildWindowMenu
+		+ I 	+ I 	+ "$[w.name]" Title
+		+ I 	+ I 	+ "Window Name: $[w.name] ($[w.iconname])" Nop
+		+ I 	+ I 	+ "Window Class: $[w.class]" Nop
+		+ I 	+ I 	+ "Window ID: $[w.id]" Nop
+		+ I 	+ I 	+ "Window Resource: $[w.resource]" Nop
+		+ I 	+ I 	+ "" Nop
+		+ I 	+ I 	+ "Window Coordinates: $[w.x], $[w.y]" Nop
+		+ I 	+ I 	+ "Window Size: $[w.width]x$[w.height]" Nop
+		+ I 	+ I 	+ "" Nop
+		+ I 	+ I 	+ "Current Page: $[page.nx], $[page.ny]" Nop
+		+ I 	+ I 	+ "Current Desk: $[desk.n]" Nop
+		+ I 	+ I 	+ "" Nop
+		+ I 	+ I 	+ "Useful Things Coming soon..." -
+		+ I buildWindowMenu
+		+ I 
+		+ I ### Set Desktop Shortcuts ###
+		+ I Mouse 1 R N Menu launcher # Left-click Launcher
+		+ I Mouse 2 R N Menu yaluConfiguration # Middle-click YALU Config
+		+ I Mouse 3 R N Menu execHistory # Right-click Program History
+		+ I Mouse 3 R M Menu execOutput # Alt+Right-click Program output
+		+ I 
+		+ I # These functions are expected by yaluConfig but they need not do anything
+		+ I DestroyFunc setExecHistoryType
+		+ I AddToFunc setExecHistoryType I Nop
+		+ I DestroyFunc setTerminal
+		+ I AddToFunc setTerminal I YaluMenu launcher
+		+ I DestroyFunc setBrowser
+		+ I AddToFunc setBrowser I YaluMenu launcher
+		+ I DestroyFunc setEditor
+		+ I AddToFunc setEditor I YaluMenu launcher
 	
-	### Set Desktop Shortcuts ###
-	Mouse 1 R N Menu launcher # Left-click Launcher
-	Mouse 2 R N Menu yaluConfiguration # Middle-click YALU Config
-	Mouse 3 R N Menu execHistory # Right-click Program History
-	Mouse 3 R M Menu execOutput # Alt+Right-click Program output
-	
-	# These functions are expected by yaluConfig but they need not do anything
-	DestroyFunc setExecHistoryType
-	AddToFunc setExecHistoryType I Nop
-	DestroyFunc setTerminal
-	AddToFunc setTerminal I YaluMenu launcher
-	DestroyFunc setBrowser
-	AddToFunc setBrowser I YaluMenu launcher
-	DestroyFunc setEditor
-	AddToFunc setEditor I YaluMenu launcher
+	#reloadAllMenus # Done by setTheme
 
 ################################################################################
 # Keyboard Shortcuts                                                           #
@@ -814,6 +845,8 @@
 	AddToFunc setTheme
 		# Load theme file
 		+ I Read "$[yaluTheme]"
+		# Reload all menus (with new icons)
+		+ I reloadAllMenus
 		# Set default window colours
 		+ I Style * HilightColorset 0
 		+ I Style * Colorset 1

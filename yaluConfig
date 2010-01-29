@@ -47,6 +47,10 @@ SetEnv yaluSnapDistance "10"
 #  From Bottom-Right: "WarpToWindow 100% 100%"
 SetEnv yaluResizeCorner "WarpToWindow 100% 100%"
 
+# Use Auto-Riase
+#   The delay in ms or -1 to disable
+SetEnv yaluAutoRaise "-1"
+
 ################################################################################
 # Desk and Paging Prefrences                                                   #
 ################################################################################
@@ -54,7 +58,7 @@ SetEnv yaluResizeCorner "WarpToWindow 100% 100%"
 SetEnv yaluDesks "0"
 
 # Desktop Sizes (In Pages)
-SetEnv yaluDeskWidth "3"
+SetEnv yaluDeskWidth "4"
 SetEnv yaluDeskHeight "2"
 
 # Edge-Jump Size (In % of the screen's width)
@@ -83,5 +87,5 @@ SetEnv yaluWindowTypeColours ""
 # File type used for icons
 SetEnv yaluImageType "png"
 
-# The name of the theme to use
-SetEnv yaluTheme "/home/jonathan/.yalu/themes/default"
+# The filename of the theme to use
+SetEnv yaluTheme "$[YALU]/themes/default"
