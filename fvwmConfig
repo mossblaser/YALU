@@ -566,13 +566,13 @@
 		+ I ### YALU Configuration Menu ###
 		+ I DestroyMenu yaluConfiguration
 		+ I AddToMenu yaluConfiguration "YALU Configuration" Title
-		+ I 	+ "Wallpaper" YaluWallpaper setGUI
-		+ I 	+ "Working Directory" Popup workingDirectoryConfig
+		+ I 	+ "%wallpaper%Set Wallpaper" YaluWallpaper setGUI
+		+ I 	+ "%workingDir%Working Directory" Popup workingDirectoryConfig
 		+ I 	+ "" Nop
-		+ I 	+ "&Programs" Popup programs
-		+ I 	+ "&Windows" Popup windows
-		+ I 	+ "Paging and &Desks" Popup pagingAndDesks
-		+ I 	+ "&Theme" Popup theme
+		+ I 	+ "%programs%&Programs" Popup programs
+		+ I 	+ "%windows%&Windows" Popup windows
+		+ I 	+ "%pagesAndDesks%Paging and &Desks" Popup pagingAndDesks
+		+ I 	+ "%theme%&Theme" Popup theme
 		+ I 	+ "" Nop
 		+ I 	+ "%fvwm%&FVWM Menu" Popup MenuFvwmRoot
 		+ I 	+ "" Nop
@@ -621,11 +621,11 @@
 		+ I AddToMenu pagingAndDesks "Paging and Desk Configuration" Title
 		+ I 	+ "Number of Desks" Popup desksConfig
 		+ I 	+ "" Nop
-		+ I 	+ "Horizontal Pages Per Desk" Popup deskWidthConfig
-		+ I 	+ "Vertical Pages Per Desk" Popup deskHeightConfig
+		+ I 	+ "%horizontalPages%Horizontal Pages Per Desk" Popup deskWidthConfig
+		+ I 	+ "%verticalPages%Vertical Pages Per Desk" Popup deskHeightConfig
 		+ I 	+ "" Nop
-		+ I 	+ "Horizontal Screen Edge Jump Size" Popup edgeJumpWidthConfig
-		+ I 	+ "Vertical Screen Edge Jump Size" Popup edgeJumpHeightConfig
+		+ I 	+ "%horizontalEdgeSize%Horizontal Screen Edge Jump Size" Popup edgeJumpWidthConfig
+		+ I 	+ "%verticalEdgeSize%Vertical Screen Edge Jump Size" Popup edgeJumpHeightConfig
 		+ I 	+ "Edge Jump Delay" Popup edgeResistDelayConfig
 		+ I 
 		+ I ### Theme (Config) Menu ###
@@ -746,6 +746,15 @@
 	AddToFunc setEditor I YaluMenu launcher
 	
 	#reloadAllMenus # Done by setTheme
+
+
+################################################################################
+# Mouse Gestures                                                               #
+#   Set mouse gestures to use throughout the system                            #
+################################################################################
+	# Super+Right-click Mouse-gestures
+	Mouse 0 A 4 StrokeFunc EchoSequence DrawMotion StrokeWidth 3
+	
 
 ################################################################################
 # Keyboard Shortcuts                                                           #

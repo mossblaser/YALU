@@ -13,7 +13,6 @@
 #      yaluMenu [menu name]
 
 import sys, os, commands, re
-
 ################################################################################
 # Menu Object                                                                  #
 #   Is used to construct the neccesary code to make an Fvwm menu.              #
@@ -112,6 +111,9 @@ class GlobalShortcuts:
 		# Dictionary of lists of (label, command) tuples to bind to keyboard
 		# shortcuts.
 		self.shortcuts = {}
+		
+		# A dictionary of stroke pattern strings: {pattern: command}
+		self.strokes = {}
 	
 	def __getHotkeyPosition(self, label):
 		"""
@@ -125,13 +127,17 @@ class GlobalShortcuts:
 		else:
 			return 0
 	
-	def append(self, label, command = None):
+	def append(self, label, command = None, stroke = None):
 		"""The shortcut to be used is extracted from the label as in Fvwm"""
 		
 		# If no command is specified simply use the label specified with any
 		# ampersands removed.
 		if not command:
 			command = label.replace("&","")
+		
+		# Add the stroke to the dictionary
+		if stroke:
+			self.strokes[stroke] = "YaluExec %s"%(command,)
 		
 		hotkey = label[self.__getHotkeyPosition(label)].lower()
 		
@@ -140,18 +146,21 @@ class GlobalShortcuts:
 		else:
 			self.shortcuts[hotkey] = [(label, command)]
 	
+	def bindKey(self, hotkey, action):
+		"""Binds a key and graffiti style gesture to the given action"""
+		return "Key %s A %s %s\n"%(
+			hotkey,
+			self.modifier,
+			action
+		)
+	
 	def __str__(self):
 		"""Generate the appropriate bindings/menus"""
 		returnString = ""
-		
 		for hotkey in self.shortcuts:
 			if len(self.shortcuts[hotkey]) == 1:
 				# Directly launch the program if no collisions
-				returnString += "Key %s A %s YaluExec %s\n"%(
-					hotkey,
-					self.modifier,
-					self.shortcuts[hotkey][0][1]
-				)
+				returnString += self.bindKey(hotkey, "YaluExec " + self.shortcuts[hotkey][0][1])
 			else:
 				# Generate hotkey menu if there are collisions
 				hotkeyMenu = Menu(
@@ -176,15 +185,18 @@ class GlobalShortcuts:
 						)
 					else:
 						# Fall-back -- use first letter
-						labelWithNewHotkey = label.str_replace("&","")
+						labelWithNewHotkey = label.replace("&","")
 					
 					hotkeyMenu.appendProgram(labelWithNewHotkey, command)
 				
 				# Add the generated menu and the key binding for that key
 				returnString += "%s\n"%(hotkeyMenu,)
-				returnString += "Key %s A %s Menu autoYaluMenu_hotkey_%s_and_%s\n"%(
-					hotkey, self.modifier, self.modifier, hotkey
-				)
+				returnString += self.bindKey(hotkey,
+				                             "Menu autoYaluMenu_hotkey_%s_and_%s"%(
+				                              	self.modifier, hotkey))
+		# Add all strokes
+		for stroke in self.strokes:
+			returnString += "Stroke %s 0 A 4 %s\n"%(stroke, self.strokes[stroke])
 		return returnString
 
 ################################################################################
@@ -203,14 +215,22 @@ def generateLauncher():
 	launcher = Menu("launcher", True, "YetAnotherLevelUp")
 	shortcuts = GlobalShortcuts()
 	
-	def appendWithShortcut(label, command):
+	def appendWithShortcut(label, command, stroke):
 		launcher.appendProgram(label, command)
-		shortcuts.append(label, command)
+		shortcuts.append(label, command, stroke)
+	
+	def extractStroke(label):
+		# Find the stroke pattern (if there is one) and strip it out of the label
+		match = re.match("([^{]*)[\s]?[{](\d+)[}]$", label)
+		if match:
+			label = match.group(1)
+			return match.group(1,2)
+		return label, None
 	
 	# Add 'fixed' menu items first
-	appendWithShortcut("&Terminal", os.environ["yaluTerminal"])
-	appendWithShortcut("&Web Browser", os.environ["yaluBrowser"])
-	appendWithShortcut("&Editor", os.environ["yaluEditor"])
+	appendWithShortcut("&Terminal", os.environ["yaluTerminal"], "456")
+	appendWithShortcut("&Web Browser", os.environ["yaluBrowser"], "74123")
+	appendWithShortcut("&Editor", os.environ["yaluEditor"], "14789")
 	launcher.appendSpacer()
 	
 	# Load user's menu
@@ -221,12 +241,14 @@ def generateLauncher():
 		elif rawMenuData.find("\t") != -1:
 			# Tab-separated label and command
 			label, _ , command = rawMenuData.partition("\t")
-			appendWithShortcut(label, command)
+			label, stroke = extractStroke(label)
+			appendWithShortcut(label, command, stroke)
 		else:
 			# Command/Label are the same -- just strip the ampersands for the cmd
 			label = rawMenuData
-			command = rawMenuData.replace("&","")
-			appendWithShortcut(label, command)
+			label, stroke = extractStroke(label)
+			command = label.replace("&","")
+			appendWithShortcut(label, command, stroke)
 	
 	# Add a quit button
 	launcher.append("Quit", "Quit", "quit")
