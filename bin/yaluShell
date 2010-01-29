@@ -1,0 +1,21 @@
+#!/bin/bash
+ ##############################################################################
+################################################################################
+####            YetAnotherLevelUp (YALU), an FVWM Configuration             ####
+####               ~ Jonathan Heathcote                                     ####
+####               ~ September 2009 - Present                               ####
+####               ~ GNU GPLv3                                              ####
+################################################################################
+ ##############################################################################
+# yaluShell:
+#   A BASH wrapper that will change directory into a user-specified directory
+#   depending on the desk and page.
+directory="$(
+	(cat "${LocalYALU}/workingDir/desk${yaluDesk}/page${yaluPageX}x${yaluPageY}/path" || \
+	cat "${LocalYALU}/workingDir/desk${yaluDesk}/path" || \
+	cat "${LocalYALU}/workingDir/path" || \
+	echo "$HOME") 2>/dev/null
+)"
+cd "${directory:-$HOME}"
+exec /bin/bash "$@"
+

@@ -44,6 +44,9 @@
 	
 	### Set the YALU directory containing per-user settings ###
 	SetEnv LocalYALU "$[HOME]/.yalu"
+	
+	### Set the default shell to the yalu wrapper to enable custom working dirs ###
+	ExecUseShell "$[YALU]/bin/yaluShell"
 
 	### Load user configuration ###
 	Read "$[LocalYALU]/yaluConfig"
@@ -312,6 +315,12 @@
 	AddToFunc YaluWallpaper
 		+ I Exec exec "$[YALU]/bin/yaluWallpaper" $*
 	
+	### Working Directory Management###
+	# [Todo: Syntax guide]
+	DestroyFunc YaluWorkingDir
+	AddToFunc YaluWorkingDir
+		+ I Exec exec "$[YALU]/bin/yaluWorkingDir" $*
+	
 	# This function is expected by yaluConfig however it doesn't need to do
 	# anything
 	DestroyFunc setDelayExitTime
@@ -551,8 +560,8 @@
 		+ I ### YALU Configuration Menu ###
 		+ I DestroyMenu yaluConfiguration
 		+ I AddToMenu yaluConfiguration "YALU Configuration" Title
-		+ I 	+ "Set Wallpaper" YaluWallpaper setGUI
-		+ I 	+ "Set Working Directory" Popup themeConfig
+		+ I 	+ "Wallpaper" YaluWallpaper setGUI
+		+ I 	+ "Working Directory" Popup workingDirectoryConfig
 		+ I 	+ "" Nop
 		+ I 	+ "&Programs" Popup programs
 		+ I 	+ "&Windows" Popup windows
@@ -563,6 +572,13 @@
 		+ I 	+ "" Nop
 		+ I 	+ "%restart%&Restart" Restart
 		+ I 	+ "%quit%&Quit" Quit
+		+ I 
+		+ I ### Working Directory Config ###
+		+ I DestroyMenu workingDirectoryConfig
+		+ I AddToMenu workingDirectoryConfig "Set Working Directory" Title
+		+ I 	+ "For this page" YaluWorkingDir page GUI
+		+ I 	+ "For this desk" YaluWorkingDir desk GUI
+		+ I 	+ "For everything" YaluWorkingDir all GUI
 		+ I 
 		+ I ### Programs (Config) Menu ###
 		+ I DestroyFunc generatePrograms

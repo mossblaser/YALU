@@ -103,7 +103,6 @@ function setWall {
 	case "$1" in
 		"desk")
 			wallpaperDir="$wallpaperDir/desk$yaluDesk"
-			toDelete="$wallpaperDir/*"
 			shift ;;
 		"page")
 			wallpaperDir="$wallpaperDir/desk$yaluDesk/page${yaluPageX}x${yaluPageY}"

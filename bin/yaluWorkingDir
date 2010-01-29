@@ -1,0 +1,51 @@
+#!/bin/bash
+ ##############################################################################
+################################################################################
+####            YetAnotherLevelUp (YALU), an FVWM Configuration             ####
+####               ~ Jonathan Heathcote                                     ####
+####               ~ September 2009 - Present                               ####
+####               ~ GNU GPLv3                                              ####
+################################################################################
+ ##############################################################################
+# yaluWorkingDir:
+#   Change the current YALU working directory for a specified scope.
+#      yaluWorkingDir [{page|desk|all}] [workingDirectory]
+#   Defaults to "page" and "$HOME"
+
+# Work out the scope of the setting
+case "$1" in
+	"page" )
+		fileDirectory="$LocalYALU/workingDir/desk$yaluDesk/page${yaluPageX}x${yaluPageY}/"
+		shift
+		;;
+	"desk" )
+		fileDirectory="$LocalYALU/workingDir/desk$yaluDesk/"
+		shift
+		;;
+	"all" )
+		fileDirectory="$LocalYALU/workingDir/"
+		shift
+		;;
+	* )
+		fileDirectory="$LocalYALU/workingDir/desk$yaluDesk/page${yaluPageX}x${yaluPageY}/"
+		;;
+esac
+
+
+if [ -n "$fileDirectory" ]; then # Safety
+	rm -rf "$fileDirectory/"*
+fi
+
+mkdir -p "$fileDirectory"
+
+if [ "$1" == "GUI" ]; then
+	dir="$(zenity \
+		--file-selection --directory \
+		--title="YetAnotherLevelUp -- Pick a working directory"
+	)" || return 1
+	echo "$dir" > "$fileDirectory/path"
+elif [ -n "$1" ]; then
+	echo "$1" > "$fileDirectory/path"
+else
+	pwd > "$fileDirectory/path"
+fi
