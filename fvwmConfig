@@ -754,7 +754,6 @@
 ################################################################################
 	# Super+Right-click Mouse-gestures
 	Mouse 0 A 4 StrokeFunc EchoSequence DrawMotion StrokeWidth 3
-	
 
 ################################################################################
 # Keyboard Shortcuts                                                           #
