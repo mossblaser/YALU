@@ -480,7 +480,7 @@
 	AddToFunc InteliTile
 		+ I PipeRead "$[YALU]/bin/yaluInteliTile.py init $[vp.width] $[vp.height]"
 		+ I Iconify True
-		+ I All (CurrentPage,!Iconic,Visible) \
+		+ I All (CurrentPage,!Iconic,Visible,!yaluPager,!yaluButtons) \
 		    PipeRead "$[YALU]/bin/yaluInteliTile.py add $[yaluInteliTileID] $[w.x] $[w.y] $[w.width] $[w.height]"
 		+ I Iconify False
 		+ I PipeRead "$[YALU]/bin/yaluInteliTile.py place $[yaluInteliTileID] $[w.x] $[w.y] $[w.width] $[w.height]"
@@ -495,7 +495,12 @@
 	Mouse 1 2 C abortOnDrag Destroy # Ctl+Left-Click: Destroy
 	
 	### Top Right (Maximize) ###
-	Mouse 1 4 N abortOnDrag Maximize # Left-Click: Maximize
+	Mouse 1 4 N maximiseButtonAction # Left-Click: Maximize, Hold: InteliTile
+	DestroyFunc maximiseButtonAction
+	AddToFunc maximiseButtonAction
+		+ C Maximize
+		+ M Nop
+		+ H InteliTile
 	Mouse 2 4 N abortOnDrag Maximize 100 0 # Middle-Click: Wide
 	Mouse 3 4 N abortOnDrag Maximize 0 100 # Right-Click: Tall
 	
@@ -730,6 +735,9 @@
 		Key F3 A M Maximize # Toggle, Alt+F3
 		Key F3 A SM Maximize 0 100 # Toggle Tall, Shift+Alt+F3
 		Key F3 A M4 Maximize 100 0 # Toggle Wide, Super+Alt+F3
+		
+		# InteliTilie
+		Key F5 A M InteliTile # Toggle, Alt+F5
 		
 		# Iconify
 		Key F2 A M Iconify # Alt+F2

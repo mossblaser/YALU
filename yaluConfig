@@ -58,7 +58,7 @@ SetEnv yaluAutoRaise "-1"
 SetEnv yaluDesks "0"
 
 # Desktop Sizes (In Pages)
-SetEnv yaluDeskWidth "4"
+SetEnv yaluDeskWidth "3"
 SetEnv yaluDeskHeight "2"
 
 # Edge-Jump Size (In % of the screen's width)
