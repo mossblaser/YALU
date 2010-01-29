@@ -91,9 +91,8 @@ function applyWall {
 		else
 			feh --bg-`echo "$bgType"` "$bgValue"
 		fi
-		echo "Changed wallpaper!" 1>&2
 	else
-		echo "Keeping old background (use yaluWallpaper init to force change)" 1>&2
+		# Keeping old background (use yaluWallpaper init to force change)
 	fi
 } # function applyWall
 

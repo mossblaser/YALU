@@ -1,0 +1,112 @@
+#!/usr/bin/python
+ ##############################################################################
+################################################################################
+####            YetAnotherLevelUp (YALU), an FVWM Configuration             ####
+####               ~ Jonathan Heathcote                                     ####
+####               ~ September 2009 - Present                               ####
+####               ~ GNU GPLv3                                              ####
+################################################################################
+ ##############################################################################
+# yaluWindowColour:
+#   Provides an interface to set the colours for a particular window in the
+#   user's config file with a graphical interface.
+#   Usage:
+#      yaluWindowColour appName [{#color#color,clear}]
+
+import os, sys, commands, re, Tkinter, tkColorChooser
+
+def FvwmCommand(command):
+	"""Execute a command inside FVWM"""
+	command = command.replace("\"","\\\"")
+	commands.getoutput("FvwmCommand \"%s\""%(command,))
+
+def makeFaint(colour):
+	"""
+	Takes a hex colour string (#ffffff) and returns the equivilent more
+	washed-out colour
+	"""
+	fainterColour = {
+		"f" : "f", "e" : "f", "d" : "e", "c" : "e",
+		"b" : "d", "a" : "d", "9" : "c", "8" : "c",
+		"7" : "b", "6" : "b", "5" : "a", "4" : "a",
+		"3" : "9", "2" : "9", "1" : "8", "0" : "8",
+	}
+	newColour = "#"
+	for char in colour.lower()[1:]:
+		newColour += fainterColour[char]
+	return newColour
+
+def setColour(window, bgColour, fgColour):
+	"""
+	Set the window colour (and add it to the user's config file).
+	"""
+	config = open("yaluConfig", "r").read()
+	
+	# Remove quotations added by FVWM (if present)
+	window = window.strip("'")
+	
+	newConfigLine = "AddToFunc userColours I Style \"%s\" BackColor %s, ForeColor %s, HilightBack %s, HilightFore %s"%(
+		window,
+		bgColour,
+		fgColour,
+		fgColour,
+		"#000000"
+	)
+	
+	# Check the file for a matching old line (if present)
+	regex = "AddToFunc userColours I Style \"%s\" .*"%(window,)
+	config, noOfReplacements = re.subn(regex, newConfigLine, config)
+	
+	# Add the new line if no replacement was made above
+	if noOfReplacements == 0:
+		config += "%s\n"%(newConfigLine,)
+	
+	# Send Fvwm command to update function
+	FvwmCommand(newConfigLine)
+	FvwmCommand("setTheme")
+	
+	# Save the new config
+	open("yaluConfig", "w").write(config)
+
+def clearColour(window):
+	config = open("yaluConfig", "r").read()
+	
+	window = window.strip("'")
+	
+	# Check the file for the matching style and remove it
+	regex = "AddToFunc userColours I Style \"%s\" .*\n?"%(window,)
+	config, noOfReplacements = re.subn(regex, "", config)
+	
+	# Save the new config
+	open("yaluConfig", "w").write(config)
+	
+	# Send Fvwm command to re-load the function
+	FvwmCommand("DestroyFunc userColours")
+	FvwmCommand("Read $[LocalYALU]/yaluConfig")
+	FvwmCommand("setTheme")
+
+def askForColours():
+	"""Present two dialgoues to allow the user to pick a fg and bg colour"""
+	root = Tkinter.Tk()
+	root.withdraw()
+	_ , bgColour = tkColorChooser.askcolor()
+	if bgColour:
+		_ , fgColour = tkColorChooser.askcolor(makeFaint(bgColour))
+		if fgColour:
+			setColour(sys.argv[1], bgColour, fgColour)
+
+if __name__ == "__main__":
+	# Move into the YALU dir so that all paths from now on can be relative
+	os.chdir(os.environ["LocalYALU"])
+	
+	if len(sys.argv) == 2:
+		### No Argument ###
+		askForColours()
+	elif len(sys.argv) == 3 and sys.argv[2] == "clear":
+		### Clear ###
+			clearColour(sys.argv[1])
+	elif len(sys.argv) == 3:
+		### Provided Colours ###
+		setColour(sys.argv[1], sys.argv[2][:7], sys.argv[2][7:14])
+	else:
+		print "Unrecognised Command"

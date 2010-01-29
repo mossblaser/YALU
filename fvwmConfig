@@ -321,6 +321,12 @@
 	AddToFunc YaluWorkingDir
 		+ I Exec exec "$[YALU]/bin/yaluWorkingDir" $*
 	
+	### Window Colour Management ###
+	# [Todo: Syntax guide]
+	DestroyFunc YaluWindowColour
+	AddToFunc YaluWindowColour
+		+ I Exec exec "$[YALU]/bin/yaluWindowColour" $*
+	
 	# This function is expected by yaluConfig however it doesn't need to do
 	# anything
 	DestroyFunc setDelayExitTime
@@ -636,20 +642,87 @@
 		+ I 	+ I DestroyMenu windowMenu
 		+ I 	+ I AddToMenu windowMenu
 		+ I 	+ I 	+ DynamicPopupAction buildWindowMenu
-		+ I 	+ I 	+ "$[w.name]" Title
-		+ I 	+ I 	+ "Window Name: $[w.name] ($[w.iconname])" Nop
-		+ I 	+ I 	+ "Window Class: $[w.class]" Nop
-		+ I 	+ I 	+ "Window ID: $[w.id]" Nop
-		+ I 	+ I 	+ "Window Resource: $[w.resource]" Nop
+		+ I 	+ I 	+ "%close%Close" Popup windowClose
+		+ I 	+ I 	+ "Maximize" Popup windowMaximize
+		+ I 	+ I 	+ "Fill Space" Popup windowInteliTile
+		+ I 	+ I 	+ "Iconify (Alt+F2)" Iconify
 		+ I 	+ I 	+ "" Nop
-		+ I 	+ I 	+ "Window Coordinates: $[w.x], $[w.y]" Nop
-		+ I 	+ I 	+ "Window Size: $[w.width]x$[w.height]" Nop
+		+ I 	+ I 	+ "Shade/Unshade (Alt+Shift+F2)" WindowShade
+		+ I 	+ I 	+ "Stick/Unstick (Alt+Shift+F1)" Stick
 		+ I 	+ I 	+ "" Nop
-		+ I 	+ I 	+ "Current Page: $[page.nx], $[page.ny]" Nop
-		+ I 	+ I 	+ "Current Desk: $[desk.n]" Nop
+		+ I 	+ I 	+ "Move To Page" Popup windowMovePage
+		+ I 	+ I 	+ "Move To Desk" Popup windowMoveDesk
 		+ I 	+ I 	+ "" Nop
-		+ I 	+ I 	+ "Useful Things Coming soon..." -
+		+ I 	+ I 	+ "Throw Window" Popup windowThrow
+		+ I 	+ I 	+ "Fling Window" Popup windowFling
+		+ I 	+ I 	+ "" Nop
+		+ I 	+ I 	+ "Raise (Alt+Space)" Raise
+		+ I 	+ I 	+ "Lower (Ctrl+Alt+Space)" Lower
+		+ I 	+ I 	+ "" Nop
+		+ I 	+ I 	+ "Place Window Again (Alt+F9)" PlaceAgain Anim
+		+ I 	+ I 	+ "Redraw Window (Alt+F10)" RefreshWindow
+		+ I 	+ I 	+ "" Nop
+		+ I 	+ I 	+ "Set colour for all $[w.name] windows" Popup windowNameColour
+		+ I 	+ I 	+ "Set colour for all $[w.class] windows" Popup windowClassColour
+		+ I 	+ I 	+ "" Nop
+		+ I 	+ I 	+ "Window Information" Module FvwmIdent
+		+ I 	+ I DestroyMenu windowNameColour
+		+ I 	+ I AddToMenu windowNameColour
+		+ I 	+ I 	+ "%defaultColour%System Default" YaluWindowColour "$[w.name]" clear
+		+ I 	+ I 	+ "%pickColour%Pick Colour" YaluWindowColour "$[w.name]"
+		+ I 	+ I DestroyMenu windowClassColour
+		+ I 	+ I AddToMenu windowClassColour
+		+ I 	+ I 	+ "%defaultColour%System Default" YaluWindowColour "$[w.class]" clear
+		+ I 	+ I 	+ "%pickColour%Pick Colour" YaluWindowColour "$[w.class]"
 		+ I buildWindowMenu
+		+ I
+		+ I DestroyMenu windowClose
+		+ I AddToMenu windowClose
+		+ I 	+ "%close%Close (Alt+F4)" Close
+		+ I 	+ "%delete%Delete (Alt+Super+F4)" Delete
+		+ I 	+ "%destroy%Destroy (Alt+Shift+Super+F4)" Destroy
+		+ I
+		+ I DestroyMenu windowMaximize
+		+ I AddToMenu windowMaximize
+		+ I 	+ "%maximize%Maximize (Alt+F3)" Maximize
+		+ I 	+ "%tallMaximize%Tall Maximize (Alt+Shift+F3)" Maximize 0 100
+		+ I 	+ "%wideMaximize%Wide Maximize (Alt+Super+F3)" Maximize 100 0
+		+ I
+		+ I DestroyMenu windowInteliTile
+		+ I AddToMenu windowInteliTile
+		+ I 	+ "%inteliTitle%Fill Space (Alt+F5)" InteliTile place
+		+ I 	+ "%tallInteliTitle%Fill Vertical Space (Alt+Shift+F3)" InteliTile tallPlace
+		+ I 	+ "%wideInteliTitle%Fill Horizontal Space (Alt+Super+F3)" InteliTile widePlace
+		+ I
+		+ I DestroyMenu windowMovePage
+		+ I AddToMenu windowMovePage
+		+ I 	+ "%pageLast%Move To Last Page (Ctrl+Alt+Super+Tab)" moveAndGoTo Page prev
+		+ I 	+ "" Nop
+		+ I 	+ "%pageRight%Move Right (Ctrl+Alt+Super+Right)" moveAndGoTo Page +1p 0p
+		+ I 	+ "%pageLeft%Move Left (Ctrl+Alt+Super+Left)" moveAndGoTo Page -1p 0p
+		+ I 	+ "%pageUp%Move Up (Ctrl+Alt+Super+Up)" moveAndGoTo Page 0p -1p
+		+ I 	+ "%pageDown%Move Down (Ctrl+Alt+Super+Down)" moveAndGoTo Page 0p +1p
+		+ I
+		+ I DestroyMenu windowMoveDesk
+		+ I AddToMenu windowMoveDesk
+		+ I 	+ "%pageLast%Move To Previous Desk (Ctrl+Alt+Super+Tab)" moveAndGoTo Desk prev 0 $[yaluDesks]
+		+ I 	+ "" Nop
+		+ I 	+ "%deskNext%Move Next (Ctrl+Alt+Shift+Super+Right)" moveAndGoTo Desk 1 0 0 $[yaluDesks]
+		+ I 	+ "%deskPrev%Move Prev (Ctrl+Alt+Shift+Super+Left)" moveAndGoTo Desk -1 0 0 $[yaluDesks]
+		+ I
+		+ I DestroyMenu windowFling
+		+ I AddToMenu windowFling
+		+ I 	+ "%flingRight%Fling Right (Ctrl+Shift+Right)" flingRight
+		+ I 	+ "%flingLeft%Fling Left (Ctrl+Shift+Left)" flingLeft
+		+ I 	+ "%flingUp%Fling Up (Ctrl+Shift+Up)" flingUp
+		+ I 	+ "%flingDown%Fling Down (Ctrl+Shift+Down)" flingDown
+		+ I
+		+ I DestroyMenu windowThrow
+		+ I AddToMenu windowThrow
+		+ I 	+ "%throwRight%Throw Right (Alt+Super+Right)" throwRight
+		+ I 	+ "%throwLeft%Throw Left (Alt+Super+Left)" throwLeft
+		+ I 	+ "%throwUp%Throw Up (Alt+Super+Up)" throwUp
+		+ I 	+ "%throwDown%Throw Down (Alt+Super+Down)" throwDown
 	
 	### Set Desktop Shortcuts ###
 	DestroyFunc desktopLeftClick
@@ -758,14 +831,14 @@
 		# Close
 		Key F4 A M Close # Graceful Close, Alt+F4
 		Key F4 A M4 Delete # Forceful Close, Alt+Super+F4
-		Key F4 A CM4 Destroy # Force-Close, Ctrl+Alt+Super+F4
+		Key F4 A SM4 Destroy # Force-Close, Shift+Alt+Super+F4
 		
 		# Maximize
 		Key F3 A M Maximize # Toggle, Alt+F3
 		Key F3 A SM Maximize 0 100 # Toggle Tall, Shift+Alt+F3
 		Key F3 A M4 Maximize 100 0 # Toggle Wide, Super+Alt+F3
 		
-		# InteliTilie
+		# InteliTile
 		# Largest Space, Alt+F5
 		Key F5 A M InteliTile place
 		# Tallest Space, Shift+Alt+F5
@@ -784,7 +857,7 @@
 		Key Space A CM Lower # Ctrl+Alt+Space
 		
 		# Sticky window
-		Key Space A SM Stick # Shift+Alt+Space
+		Key F1 A SM Stick # Shift+Alt+F1
 		
 		# Re-place window
 		Key F9 A M PlaceAgain Anim # Alt+F9
@@ -910,6 +983,8 @@
 		+ I $[yaluWindowTypeColours] setGroupStyle Multimedia Colorset 19
 		+ I $[yaluWindowTypeColours] setGroupStyle Graphics HilightColorset 20
 		+ I $[yaluWindowTypeColours] setGroupStyle Graphics Colorset 21
+		# Set colours specified by user
+		+ I $[yaluWindowTypeColours] userColours
 	
 	### Allow user-configuration of window type colouring ###
 	DestroyFunc setWindowTypeColours
