@@ -9,12 +9,22 @@
  ##############################################################################
 # yaluInteliTile:
 #   Inteligently maximise a window into the largest and most appropriate free
-#   space. Usage:
-#      yaluInteliTile init [screenWidth] [screenHeight]
-#   For all windows on the screen:
-#      yaluInteliTile add [yaluInteliTileID] [x] [y] [width] [height]
-#   For the window you wish to move
-#      yaluInteliTile place [yaluInteliTileID] [x] [y] [width] [height]
+#   space, emulating some tiling WM behaviours. Usage:
+#
+#   Before using, initialise a tempoary file (and its address is stored as
+#   yaluInteliTileID in the environment variables)
+#       yaluInteliTile init [screenWidth] [screenHeight]
+#
+#   For each window which is not going to be moved run this:
+#       yaluInteliTile add [yaluInteliTileID] [x] [y] [width] [height]
+#
+#   FEATURES:
+#   To maximise a window into a free space
+#       yaluInteliTile place [yaluInteliTileID] [x] [y] [width] [height]
+#   To maximise a window into a free space but keeping existing width
+#       yaluInteliTile tallPlace [yaluInteliTileID] [x] [y] [width] [height]
+#   To maximise a window into a free space but keeping existing height
+#       yaluInteliTile widePlace [yaluInteliTileID] [x] [y] [width] [height]
 #
 #   The space-finding algorithm used in this script was originally devised by
 #   Tom Nixon and the implementation shown is loosely based on his refrence
@@ -136,29 +146,7 @@ def partitionSpace(space, window):
 	
 	return filter(Rectangle.isValid, partitionedSpace)
 
-def placeWindow(tempFile, targetX, targetY, targetWidth, targetHeight):
-	### Extract information from tempoary file ###
-	fileObj = open(tempFile, "r")
-	rawData = fileObj.read().strip().split("\n")
-	
-	# The top line of the file is the screen size
-	screen = Rectangle(Point(0,0),
-	                   Point(*[int(x) for x in rawData[0].split(" ")[:2]]))
-	
-	target = Rectangle(Point(int(targetX), int(targetY)),
-	                   Point(int(targetX) + int(targetWidth),
-	                         int(targetY) + int(targetHeight)))
-	
-	# For each line, extract the window x,y,width,height (split by spaces) and
-	# represent as a rectangle
-	windows = [ Rectangle(Point(int(x), int(y)),
-	                      Point(int(x)+int(w), int(y)+int(h)))
-		for x,y,w,h in [line.split(" ") for line in rawData[1:]]
-	]
-	
-	# Delete the file afterwards
-	os.remove(tempFile)
-	
+def findSpaces(screen, windows):
 	### Find spaces on screen ###
 	# This algorithm was designed by Tom Nixon (and it is absolute genius). It
 	# will find all empty rectangles of space inside a given area. In effect, the
@@ -182,14 +170,84 @@ def placeWindow(tempFile, targetX, targetY, targetWidth, targetHeight):
 			else:
 				updatedEmptySpaces.extend(partitionSpace(space, window))
 		emptySpaces = updatedEmptySpaces
+	return emptySpaces
+
+def loadScreenAndWindows(tempFile):
+	### Extract information from tempoary file ###
+	fileObj = open(tempFile, "r")
+	rawData = fileObj.read().strip().split("\n")
 	
-	### Place window in best space ###
+	# The top line of the file is the screen size
+	screen = Rectangle(Point(0,0),
+	                   Point(*[int(x) for x in rawData[0].split(" ")[:2]]))
+	
+	# For each line, extract the window x,y,width,height (split by spaces) and
+	# represent as a rectangle
+	windows = [ Rectangle(Point(int(x), int(y)),
+	                      Point(int(x)+int(w), int(y)+int(h)))
+		for x,y,w,h in [line.split(" ") for line in rawData[1:]]
+	]
+	
+	# Delete the file afterwards
+	os.remove(tempFile)
+	
+	return screen, windows
+
+def loadTarget(targetX, targetY, targetWidth, targetHeight):
+	return Rectangle(Point(int(targetX), int(targetY)),
+	                 Point(int(targetX) + int(targetWidth),
+	                       int(targetY) + int(targetHeight)))
+
+def setWindowSizeAndPosition(width, height, x, y):
+	print "Maximize %ip %ip"%(width, height)
+	print "ThisWindow (Maximized) Move %ip %ip"%(x, y)
+
+def placeWindow(tempFile, *targetWindow):
+	emptySpaces = findSpaces(*loadScreenAndWindows(tempFile))
+	targetWindow = loadTarget(*targetWindow)
+	
 	largestSpace = max(emptySpaces, key=(lambda rect : rect.area))
 	
-	# Output Fvwm Commands to maximize to the new place if a space was found
 	if largestSpace:
-		print "Maximize True %ip %ip"%(largestSpace.width, largestSpace.height)
-		print "Move %ip %ip"%(largestSpace.left, largestSpace.top)
+		setWindowSizeAndPosition(largestSpace.width, largestSpace.height,
+		                         largestSpace.left, largestSpace.top)
+
+def tallPlaceWindow(tempFile, *targetWindow):
+	emptySpaces = findSpaces(*loadScreenAndWindows(tempFile))
+	targetWindow = loadTarget(*targetWindow)
+	
+	# Remove any spaces that are too narrow
+	emptySpaces = filter((lambda rect: rect.width >= targetWindow.width),
+	                     emptySpaces)
+	
+	# Sort spaces from left-to-right (so that if there are any equally sized
+	# maximum spaces then the left-most one will be chosen).
+	emptySpaces = sorted(emptySpaces, key=(lambda rect : rect.left))
+	
+	largestSpace = max(emptySpaces, key=(lambda rect : rect.height))
+	
+	if largestSpace:
+		setWindowSizeAndPosition(targetWindow.width, largestSpace.height,
+		                         largestSpace.left, largestSpace.top)
+
+def widePlaceWindow(tempFile, *targetWindow):
+	emptySpaces = findSpaces(*loadScreenAndWindows(tempFile))
+	targetWindow = loadTarget(*targetWindow)
+	
+	# Remove any spaces that are too narrow
+	emptySpaces = filter((lambda rect: rect.height >= targetWindow.height),
+	                     emptySpaces)
+	
+	# Sort spaces from top-to-bottom (so that if there are any equally sized
+	# maximum spaces then the left-most one will be chosen).
+	emptySpaces = sorted(emptySpaces, key=(lambda rect : rect.top))
+	
+	largestSpace = max(emptySpaces, key=(lambda rect : rect.width))
+	
+	if largestSpace:
+		setWindowSizeAndPosition(largestSpace.width, targetWindow.height,
+		                         largestSpace.left, largestSpace.top)
+
 
 ################################################################################
 # Commandline behaviour.                                                       #
@@ -206,6 +264,10 @@ if __name__ == "__main__":
 			storeWindowInfo(*sys.argv[2:])
 		elif sys.argv[1] == "place" and len(sys.argv) == 7:
 			placeWindow(*sys.argv[2:])
+		elif sys.argv[1] == "tallPlace" and len(sys.argv) == 7:
+			tallPlaceWindow(*sys.argv[2:])
+		elif sys.argv[1] == "widePlace" and len(sys.argv) == 7:
+			widePlaceWindow(*sys.argv[2:])
 		else:
 			sys.stderr.write("Wrong number of arguments\n")
 

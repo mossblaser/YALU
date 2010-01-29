@@ -483,7 +483,7 @@
 		+ I All (CurrentPage,!Iconic,Visible,!yaluPager,!yaluButtons) \
 		    PipeRead "$[YALU]/bin/yaluInteliTile.py add $[yaluInteliTileID] $[w.x] $[w.y] $[w.width] $[w.height]"
 		+ I Iconify False
-		+ I PipeRead "$[YALU]/bin/yaluInteliTile.py place $[yaluInteliTileID] $[w.x] $[w.y] $[w.width] $[w.height]"
+		+ I PipeRead "$[YALU]/bin/yaluInteliTile.py $* $[yaluInteliTileID] $[w.x] $[w.y] $[w.width] $[w.height]"
 
 ################################################################################
 # Window Buttons                                                               #
@@ -495,14 +495,19 @@
 	Mouse 1 2 C abortOnDrag Destroy # Ctl+Left-Click: Destroy
 	
 	### Top Right (Maximize) ###
-	Mouse 1 4 N maximiseButtonAction # Left-Click: Maximize, Hold: InteliTile
-	DestroyFunc maximiseButtonAction
-	AddToFunc maximiseButtonAction
-		+ C Maximize
+	# A function which will inteli-place if held, do nothing if dragged and
+	# maximize if clicked.
+	DestroyFunc maximiseComplexAction
+	AddToFunc maximiseComplexAction
+		+ C Maximize $0 $1
 		+ M Nop
-		+ H InteliTile
-	Mouse 2 4 N abortOnDrag Maximize 100 0 # Middle-Click: Wide
-	Mouse 3 4 N abortOnDrag Maximize 0 100 # Right-Click: Tall
+		+ H InteliTile $2
+	# Left-Click: Maximize, Hold: InteliTile
+	Mouse 1 4 N maximiseComplexAction 100 100 place
+	# Left-Click: Wide Maximize, Hold: InteliTile Wide
+	Mouse 2 4 N maximiseComplexAction 100 0 widePlace
+	# Left-Click: Maximize Tall, Hold: InteliTile Tall
+	Mouse 3 4 N maximiseComplexAction 0 100 tallPlace
 	
 	### Top Right (Iconify) ###
 	Mouse 1 6 N abortOnDrag Iconify # Left-Click: Iconify
@@ -546,6 +551,9 @@
 		+ I ### YALU Configuration Menu ###
 		+ I DestroyMenu yaluConfiguration
 		+ I AddToMenu yaluConfiguration "YALU Configuration" Title
+		+ I 	+ "Set Wallpaper" YaluWallpaper setGUI
+		+ I 	+ "Set Working Directory" Popup themeConfig
+		+ I 	+ "" Nop
 		+ I 	+ "&Programs" Popup programs
 		+ I 	+ "&Windows" Popup windows
 		+ I 	+ "Paging and &Desks" Popup pagingAndDesks
@@ -626,22 +634,27 @@
 		+ I 	+ I 	+ "" Nop
 		+ I 	+ I 	+ "Useful Things Coming soon..." -
 		+ I buildWindowMenu
-		+ I 
-		+ I ### Set Desktop Shortcuts ###
-		+ I Mouse 1 R N Menu launcher # Left-click Launcher
-		+ I Mouse 2 R N Menu yaluConfiguration # Middle-click YALU Config
-		+ I Mouse 3 R N Menu execHistory # Right-click Program History
-		+ I Mouse 3 R M Menu execOutput # Alt+Right-click Program output
-		+ I 
-		+ I # These functions are expected by yaluConfig but they need not do anything
-		+ I DestroyFunc setExecHistoryType
-		+ I AddToFunc setExecHistoryType I Nop
-		+ I DestroyFunc setTerminal
-		+ I AddToFunc setTerminal I YaluMenu launcher
-		+ I DestroyFunc setBrowser
-		+ I AddToFunc setBrowser I YaluMenu launcher
-		+ I DestroyFunc setEditor
-		+ I AddToFunc setEditor I YaluMenu launcher
+	
+	### Set Desktop Shortcuts ###
+	DestroyFunc desktopLeftClick
+	AddToFunc desktopLeftClick
+		+ C Menu launcher
+		+ M Menu launcher
+		+ H Menu execOutput
+	Mouse 1 R N desktopLeftClick # Left-click Launcher, Hold: exec output
+	
+	Mouse 2 R N Menu yaluConfiguration # Middle-click YALU Config
+	Mouse 3 R N Menu execHistory # Right-click Program History
+	
+	# These functions are expected by yaluConfig but they need not do anything
+	DestroyFunc setExecHistoryType
+	AddToFunc setExecHistoryType I Nop
+	DestroyFunc setTerminal
+	AddToFunc setTerminal I YaluMenu launcher
+	DestroyFunc setBrowser
+	AddToFunc setBrowser I YaluMenu launcher
+	DestroyFunc setEditor
+	AddToFunc setEditor I YaluMenu launcher
 	
 	#reloadAllMenus # Done by setTheme
 
@@ -737,7 +750,12 @@
 		Key F3 A M4 Maximize 100 0 # Toggle Wide, Super+Alt+F3
 		
 		# InteliTilie
-		Key F5 A M InteliTile # Toggle, Alt+F5
+		# Largest Space, Alt+F5
+		Key F5 A M InteliTile place
+		# Tallest Space, Shift+Alt+F5
+		Key F5 A SM InteliTile tallPlace
+		# Widest Space, Super+Alt+F5
+		Key F5 A M4 InteliTile widePlace
 		
 		# Iconify
 		Key F2 A M Iconify # Alt+F2
@@ -761,12 +779,17 @@
 		# Re-draw window
 		Key F10 A M RefreshWindow # Alt+F10
 	
-	### System Tray ###
+	### System Tray and Pager ###
+		DestroyFunc doToTrayAndPager
+		AddToFunc doToTrayAndPager
+			+ I All (yaluButtons) $*
+			+ I All (yaluPager) $*
+		
 		# Super+Alt+Space To Raise
-		Key Space A M4 All ("yaluButtons") Raise
+		Key Space A M4 doToTrayAndPager Raise
 		
 		# Ctl+Super+Alt+Space To Lower
-		Key Space A CM4 All ("yaluButtons") Lower
+		Key Space A CM4 doToTrayAndPager Lower
 
 ################################################################################
 # Iconified Window Behaviour                                                   #

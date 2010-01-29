@@ -89,3 +89,4 @@ SetEnv yaluImageType "png"
 
 # The filename of the theme to use
 SetEnv yaluTheme "$[YALU]/themes/default"
+

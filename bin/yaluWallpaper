@@ -141,10 +141,93 @@ function setWall {
 	
 } # function setWall
 
+function graphicalSet {
+	scope="$(zenity \
+		--list --radiolist \
+		--title="YetAnotherLevelUp" \
+		--text="Set the wallpaper for:" \
+		--column="" --column="" << END_SCOPES
+FALSE
+Current Page
+TRUE
+Current Desk
+FALSE
+Everything
+END_SCOPES
+	)" || return 1
+	
+	# Translate menu entries into commandline values
+	case "$scope" in
+		"Current Page" ) scope="page" ;;
+		"Current Desk" ) scope="desk" ;;
+		"Everything" ) scope="" ;;
+	esac
+	
+	wallpaperType="$(zenity \
+		--list --radiolist \
+		--title="YetAnotherLevelUp" \
+		--text="What type of wallpaper would you like?" \
+		--column="" --column="" << END_TYPE
+TRUE
+Static Image
+FALSE
+Random Image
+FALSE
+Plain Colour
+END_TYPE
+	)" || return 2
+	
+	if [[ "$wallpaperType" == "Plain Colour" ]]; then
+		image="$(zenity \
+			--entry \
+			--title="YetAnotherLevelUp" \
+			--text="Enter a colour (e.g. #113366)"
+		)" || return 3
+		
+		wallpaperType="colour"
+	else
+		image="$(zenity \
+			--file-selection \
+			$( [[ "$wallpaperType" == "Random Image" ]] && echo "--directory" ) \
+			--title="YetAnotherLevelUp -- Pick a Wallpaper"
+		)" || return 4
+		
+		wallpaperType="$(zenity \
+			--list --radiolist \
+			--title="YetAnotherLevelUp" \
+			--text="How should the wallpaper be tiled?" \
+			--width=350 --height=300 \
+			--column="" --column="" << END_SCOPES
+FALSE
+Center
+TRUE
+Scale
+FALSE
+Tile (Simple)
+FALSE
+Seamless (Modify and tile non-tiling image)
+END_SCOPES
+		)" || return 5
+		
+		# Translate menu entries into commandline values
+		case "$wallpaperType" in
+			"Center" ) wallpaperType="center" ;;
+			"Scale" ) wallpaperType="scale" ;;
+			"Tile (Simple)" ) wallpaperType="tile" ;;
+			"Seamless (Modify and tile non-tiling image)" ) wallpaperType="seamless" ;;
+		esac
+	fi
+	
+	setWall $scope $wallpaperType "$image"
+} # function graphicalSet
+
 case "$1" in
 	"init") applyWall force ;;
 	"set")
 		shift 1
 		setWall "$@" ;;
-	*) applyWall echo ;;
+	"setGUI")
+		shift 1
+		graphicalSet "$@" ;;
+	*) applyWall ;;
 esac
