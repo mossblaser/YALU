@@ -1,0 +1,376 @@
+\documentclass[a4paper,11pt]{article}
+\usepackage{a4-mancs}
+\usepackage{booktabs}
+\usepackage{longtable}
+\usepackage{amssymb}
+
+\newcommand{\yalu}{YetAnotherLevelUp}
+\newcommand{\alu}{AnotherLevelUp}
+
+\title{\yalu \\ \large{Documentation}}
+\date{Version 0.1 Beta}
+
+\begin{document}
+	\maketitle
+
+	\section{Introduction}
+		\subsection{What \yalu\ is...}
+			\yalu\ has been designed as a relatively powerful window-management-focused
+			configuration for FVWM. It is intended to be a spiritual successor to \alu,
+			(Which is itself a successor to AnotherLevel, itself a successor to The
+			NextLevel).
+			
+			It is a complete rewrite of the entire code-base with the following goals:
+			\begin{description}
+				\item[Improve performance] \alu\ performance on networked computers is
+					fairly poor (in part due to the large number of separate files it uses).
+					It is also fairly bloated as a result of its age and scope.
+				\item[Refocus the project scope] As mentioned above, \alu\ has a pretty massive
+					code-base as it was originally intended to be a fairly comprehensive
+					graphical environment. \yalu\ aims instead to provide a powerful
+					graphical shell and floating window manager.
+			\end{description}
+			
+			As a result of this, the resulting system is very different both
+			architecturally and functionally. This may come as a relief to some and a
+			disappointment to others\footnote{OK, just JTL...} but with a bit of time
+			learning how to use it well you should hopefully find the experience
+			pleasant.
+		
+		\subsection{What \yalu\ is \emph{not}...}
+			\begin{itemize}
+				\item \yalu\ is \emph{not} \alu. As described above it has different
+				over-all goals.
+				
+				\item \yalu\ is not a desktop \emph{environment} like GNOME or KDE.
+				These are giant projects spanning tens/hundreds of programs and aim to
+				provide everything you could need to use a computer graphically. \yalu\
+				is just a window manager and graphical shell.
+			\end{itemize}
+		
+		\subsection{What next...}
+			First off, install it obviously!
+			
+			Next, while I have included a quick-start, it is not (really) enough to
+			get you using \yalu\ to anywhere near it's potential. You might like to
+			skim over it just enough so that you'll be comfortable viewing this
+			tutorial from within \yalu\ while trying things out.
+			
+			I'd recommend that you read through the Keyboard Shortcuts and Mouse
+			Actions tables and then looking up anything that strikes your fancy. From
+			there you're free to either plough on through the rest of the manual or to
+			just play around in the menus.
+			
+			Have fun!
+	
+	\section{Installation}
+		\subsection{Required Packages}
+			\begin{itemize}
+				\item FVWM (2.4 or later)
+				\item Python (2.5 or later 2x release)
+				\item dmenu
+				\item Screen
+				\item Zenity
+				\item stalonetray
+				\item xload
+			\end{itemize}
+		
+		\subsection{For a Single User}
+			\begin{enumerate}
+				\item Copy the \texttt{.yalu} directory into your home folder
+				\item Then simply instruct FVWM to read \texttt{\textasciitilde/.yalu/fvwmConfig}. For
+					example you could:
+					\begin{description}
+						\item[Do it properly\texttrademark] Start FVWM with
+							\texttt{fvwm2 -f "\textasciitilde/.yalu/fvwmConfig"}
+						\item[Do it the easy way] Make a symlink between
+							\texttt{\textasciitilde/.yalu/fvwmConfig} and
+							\texttt{\textasciitilde/.fvwm/.fvwm2rc} and start FVWM normally.
+					\end{description}
+			\end{enumerate}
+		\subsection{For a Multiple Users}
+			Todo\footnote{
+				While this is entirely possible with the current code base I am just far
+				to lazy to ship a proper package which would make it trivial to do
+				without splitting files up. See the \texttt{YALU} and \texttt{LocalYALU}
+				environment variables in \texttt{fvwmConfig} for clues...
+			}
+	
+	\section{Quick-Start}
+		When you start \yalu\ it should look pretty much like any minimal window
+		manager does when it starts. In other words boring. Don't sit there waiting
+		for it to load because all you'll get is a wallpaper, a pager, tray and a
+		mouse cursor and that should have loaded almost instantly.
+		
+		\subsection{Menus and Launching Programs}
+		There are 5 important menus in \yalu\ and all of them can be accessed by
+		clicking on the desktop. The two you probably care about right now are:
+		\begin{description}
+			\item[Left-click] Shows a launcher with a list of favourite programs.
+			\item[Middle-click] Shows the \yalu\ configuration menu.
+		\end{description}
+		
+		For all the programs in the launcher menu you'll notice they have one letter
+		underlined, you can press this letter on the keyboard
+		to select that item. You can also press Super+\emph{Letter} to launch that
+		program from outside the menu.
+		
+		As well as the launcher, you can launch programs using dmenu. To use it,
+		press Super\footnote{The `Windows' key on most
+		keyboards}+Space\footnote{Sounds pretty awesome though, eh?}. You can now
+		start typing a program name and dmenu will try and auto-complete it (along
+		the top of the screen). Press enter to run that command or escape to cancel.
+		
+		\subsection{Window Buttons}
+		Windows have similar buttons to those on mainstream environments. You can
+		use them just the way you would normally. (Don't be fooled: if you
+		read further on in the manual then you'll see they are actually far more
+		powerful than they appear.)
+		
+		\subsection{Window Behaviour}
+		By default, windows are not `raised' above others unless you click on their
+		title bar (or press Alt+Space). You can `lower' a window by double clicking
+		on its title bar (or by pressing Ctrl+Alt+Space). This may feel annoying at
+		first but once you get used to it you'll find it very efficient (honest!).
+		
+		Windows are given keyboard focus whenever the mouse is over them. Again,
+		this may seem annoying at first, especially if you are in the habit of
+		knocking your mouse while typing. As \alu's original designer said: ``There
+		is an easy fix for this: stop hitting your mouse.''
+		
+		\subsection{Desks and Pages}
+		By default, you are given 1 `desktop' containing 6 `pages'. These pages are
+		arranged in a 3$\times$2 grid. Moving between pages is effortless: simply
+		move your mouse off the edge of the screen in the direction of the page you
+		want to go to. You can drag windows like this and they will follow your
+		mouse onto the next page too. You can also use Ctrl+Alt+\emph{Arrow} to
+		move around from your keyboard. To move and take the currently focused
+		window with you, hold down the Super key as well.
+		
+		\subsection{Really... You should read this manual...}
+		While that is all you really need to know in order to be able to \emph{use}
+		\yalu, you'll probably have a fairly miserable experience unless you also
+		learn the less trivial features. Unfortunately it \emph{will} take you a
+		reasonable amount of time and effort but just like learning how to use VIM
+		or EMACS, you should easily make a return on your investment. At the very
+		least have a look through the table of keyboard shortcuts and you'll get a
+		taste for the sorts of features \yalu\ has to offer.
+	
+	\clearpage
+	\newcommand{\subrule}{\cmidrule{2-3}}
+	\section{Keyboard Shortcuts}
+		\begin{longtable}{ l c l }
+			\toprule
+				Window Operations & Shift+Alt+F1 & Stick Window \\ \subrule
+				                  & Alt+F2 & Iconify Window \\
+				                  & Shift+Alt+F2 & Shade Window \\ \subrule
+				                  & Alt+F3 & Maximize Window \\
+				                  & Shift+Alt+F3 & Tall-Maximize Window \\
+				                  & Super+Alt+F3 & Wide-Maximize Window \\ \subrule
+				                  & Alt+F4 & Close Window \\
+				                  & Super+Alt+F4 & Delete Window \\
+				                  & Shift+Alt+F4 & Destroy Window \\ \subrule
+				                  & Alt+F5 & Maximise Window into Space \\
+				                  & Shift+Alt+F5 & Tall-Maximise Window into Space \\
+				                  & Super+Alt+F5 & Wide-Maximise Window into Space \\ \subrule
+				                  & Alt+F9 & Re-Place Window \\
+				                  & Shift+Alt+F9 & Re-Place All Windows \\ \subrule
+				                  & Alt+F10 & Re-Draw Window \\ \subrule
+				                  & Alt+Space & Raise Window \\
+				                  & Ctrl+Alt+Space & Lower Window \\ \subrule
+				                  & Ctrl+Super+\emph{Arrow} & Fling Window in direction \\
+				                  & Shift+Ctrl+Super+\emph{Arrow} & Throw Window in direction \\
+			\midrule
+				Icon Operations & Space \emph{or} Return & Open Focused Icon \\
+				                & Ctrl+Return & Open Focused Icon into Space \\ \subrule
+				                & Delete & Close Focused Icon \\
+				                & Super+Delete & Delete Focused Icon \\
+				                & Shift+Delete & Destroy Focused Icon \\ \subrule
+				                & Shift+Alt+Space & Raise and Cycle Through Icons \\
+				                & Shift+Ctrl+Alt+Space & Lower Icons \\
+			\midrule
+				Window Navigation & Super+\emph{Arrow}
+				                  & Switch to application in direction \\
+				                  & Alt+Tab & Cycle Through Window List \\
+				                  & Shift+Alt+Tab & Cycle Backwards Through Window List \\
+			\midrule
+				Page Navigation & Ctrl+Alt+\emph{Arrow} & Switch to Page in direction \\
+				                & Ctrl+Alt+Tab & Switch Previously Used Page \\ \subrule
+				                & Ctrl+Super+Alt+\emph{Arrow}
+				                & Move Window to Page in direction \\
+				                & Ctrl++SuperAlt+Tab
+				                & Move Window to Previously Used Page \\
+			\midrule
+				Desk Navigation & Shift+Ctrl+Alt+\emph{Arrow} & Switch to Desk in direction \\
+				                & Shift+Ctrl+Alt+Tab & Switch Previously Used Desk \\ \subrule
+				                & Shift+Ctrl+Super+Alt+\emph{Arrow}
+				                & Move Window to Desk in direction \\
+				                & Shift+Ctrl++SuperAlt+Tab
+				                & Move Window to Previously Used Desk \\
+			\midrule
+				Pager and Tray & Super+Alt+Space & Raise Tray and Pager \\
+				               & Ctrl+Super+Alt+Space & Lower Tray and Pager \\
+			\midrule \clearpage
+				Menus & Super+F1 & Launcher \\
+				      & Super+F2 & \yalu\ Settings \\
+				      & Super+F3 & Frequent/Recently Used \\
+				      & Super+F4 & Running Program Output \\ \subrule
+				      & Alt+F1 & Window Menu \\
+			\midrule
+				Applications & Super+T & Terminal \\
+				             & Super+W & Web Browser \\
+				             & Super+E & Editor \\ \subrule
+				             & Super+\emph{Hotkey} & Other Programs in the Launcher \\ \subrule
+				             & Super+Space & Run Application With dmenu \\
+			\bottomrule
+		\end{longtable}
+		
+		\subsection{Loose Conventions}
+			In general, where possible (or sensible) these conventions are followed
+			for keyboard shortcuts.
+			\begin{longtable}{ c l }
+				\toprule
+					\dots+Space & A Quick-Access Function \\
+					Shift+\dots & Inverts an Operation \\
+					Ctrl+Alt & Refers to a Page Operation \\
+					Super+\dots & Refers Programs or Windows \\
+					\dots+\emph{F-key} & A Window Operation or Menu. \\
+				\bottomrule
+			\end{longtable}
+			
+			For example, Ctrl+Super+Alt+Right will move the current window to the page
+			to the right because Ctrl+Alt means `Page Operation' and Super means act
+			on a window. By contrast Ctrl+Alt+Space means `Lower Window' because the
+			Space indicates that the shortcut is a quick-access function.
+	
+	\clearpage
+	\section{Mouse Actions}
+		\begin{longtable}{ l c l }
+			\toprule
+				Anywhere & Super+Drag-Click & Mouse Gesture \\
+			\midrule
+				Desktop & Left-Click & Show Launcher Menu \\
+				        & Long\footnote{Long=Held Down}-Left-Click
+				        & Show Running Program Output Menu \\
+				        & Middle-Click & Show \yalu\ Configuration Menu \\
+				        & Right-Click & Show Frequently/Recently Used Programs Menu \\
+			\midrule
+				Menus & Left-Click the Title & `Pin' the Menu \\
+				      & Scroll-Wheel & Move Through Menu Items \\
+			\midrule
+				Over a Window & Alt+Drag-Left-Click & Move Window \\
+				              & Alt+Drag-Right-Click & Resize Window \\
+			\midrule
+				Window Icon & Left-Click & Show Window Menu \\
+			\midrule
+				Window Title & Left-Click & Raise Window \\
+				             & Double-Left-Click & Lower Window \\
+				             & Drag-Left-Click & Move Window
+				               \footnote{Didn't see that coming did you?} \\
+				             & Long-Left-Click & Show Iconified Windows \\
+				             & Middle-Click & Stick Window \\
+				             & Right-Click & Re-Place Window \\
+			\midrule
+				Iconify Button & Left-Click & Iconify Window \\
+				               & Right-Click & Shade Window \\
+			\midrule
+				Maximize Button & Left-Click & Maximize Window \\
+				                & Long-Left-Click & Maximize Window into Space\\
+				                & Middle-Click & Wide-Maximize \\
+				                & Long-Middle-Click & Wide-Maximize Window into Space\\
+				                & Right-Click & Tall-Maximize \\
+				                & Long-Right-Click & Tall-Maximize Window into Space\\
+			\midrule
+				Close Button & Left-Click & Close Window \\
+				             & Super+Left-Click & Delete Window \\
+				             & Ctrl+Left-Click & Destroy Window \\
+			\bottomrule
+		\end{longtable}
+	
+	\newcommand{\ra}{$\rightarrow$}
+	\clearpage
+	\section{Menus}
+		\subsection{General Features}
+			\begin{itemize}
+				\item Middle-click a menu title to `pin' it so it won't
+					close\footnote{Note: Pinned menus will not update, for example if you
+					pin the recently used programs menu it will not change when you run new
+					programs}. This is useful if you are going to be changing a lot of
+					settings or want to create a quick launcher menu.
+				\item Use the scroll wheel on your mouse to move through menu entries.
+				\item Press the under-lined letter on a menu item to jump to that one.
+					If there are no other items sharing the same letter then it will act
+					as if you clicked it.
+			\end{itemize}
+		
+		\subsection{Launcher}
+			By default it contains a Terminal, Web Browser and Editor. You can pick
+			the programs that these functions launch in \yalu\ Configuration Menu \ra
+			Programs. Each entry is given an icon based on the first word of the
+			command it represents (usually the program name).
+			
+			For all entries in this menu the hotkey (indicated by an underlined
+			letter) is globally accessible by holding Super and that key.
+			
+			Some entries may also have an associated mouse gesture. These can be used
+			by holding down the super key and drawing it anywhere on the screen. The
+			following gestures for the default menu items are provided:
+			\begin{longtable}{l l}
+				Terminal & Line from Left-to-Right \\
+				Web Browser & Line going Up and then Right (in a right-angle) \\
+				Editor & Line going Down and then Right (in a right-angle) \\
+			\end{longtable}
+			
+			\subsubsection{Editing the Launcher}
+				The menu is generated from a file called \texttt{menu} in the \yalu\
+				directory. You can quickly open it from the \yalu\ Configuration Menu
+				\ra Programs \ra Edit Launcher.
+				
+				The file contains menu entries on separate lines with the label and
+				command separated by a tab. If the label and program name are the same
+				then you can omit the program name entirely. To add a spacer in the menu
+				simply leave an empty line.
+				
+				By default the first letter of the label is used for the hotkey. You can
+				specify another letter by putting an ampersand (\&) in front of the
+				letter you wish to use. If more than one command has the same hotkey
+				then when you press Super+\emph{Hotkey} a menu will pop up allowing you
+				to pick between the possible matches. The next letter in
+				the command's label is used as a hotkey in this menu. This means that if
+				you have both xclock and xlock bound to the hotkey `x' you could press
+				Super+X then C to run xclock.
+				
+				To assign a mouse gesture to a menu item then you simply place a
+				gesture-code inside brackets ( \{ and \} ) at the end of the
+				label.\footnote{Note: If you assign the same gesture to more than one
+				command then the last command to be assigned the gesture will over-ride
+				the others} The gesture-codes are a list of numbers indicating the shape
+				to be drawn based on the grid below:
+				\begin{longtable}{c c c}
+					1 & 2 & 3 \\
+					4 & 5 & 6 \\
+					7 & 8 & 9 \\
+				\end{longtable}
+				For example, an `N' shaped gesture-code would be \{7415963\}.
+				
+			\subsubsection{Example Launcher \texttt{menu} File}
+				\begin{verbatim}
+					GUI &File Browser {7412369}       nautilus --no-desktop
+					
+					x&clock {3214789}
+					x&lock
+					
+					VLC                               vlc
+					xine
+					Totem                             totem
+					Play All Music                    vlc ~/Music/*
+				\end{verbatim}
+		
+		\subsection{\yalu\ Configuration Menu}
+			Lalala
+	
+	\section{Options}
+		\subsection{Focus Modes}
+			\yalu\ Configuration Menu
+
+\end{document}

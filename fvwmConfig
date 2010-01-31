@@ -15,6 +15,8 @@
 #     * GNU Screen
 #     * Zenity
 #     * dmenu
+#     * stalonetray
+#     * xload
 #   As a performance-enhancement for machines running over a network this file
 #   has been designed as one big file (segmented by the large banners) rather
 #   than a number of smaller files where possible (and not wholeley
@@ -442,10 +444,9 @@
 	setPlaceMode
 	
 	# Focus Mode
-	Style (AcceptsFocus) $[yaluFocusMode]
-	
 	DestroyFunc setFocusMode
 	AddToFunc setFocusMode I Style (AcceptsFocus) $[yaluFocusMode]
+	setFocusMode
 	
 	# Window snapping
 	DestroyFunc setSnapDistance
@@ -474,9 +475,6 @@
 	# Required function by yaluConfig -- doesn't need to do anything
 	DestroyFunc setResizeCorner
 	AddToFunc setResizeCorner I Nop
-	
-	AddToFunc DoAbsoluteyNothing
-		+ I Nop
 	
 	# Auto-Raise
 	DestroyFunc setAutoRaise
@@ -752,7 +750,7 @@
 # Mouse Gestures                                                               #
 #   Set mouse gestures to use throughout the system                            #
 ################################################################################
-	# Super+Right-click Mouse-gestures
+	# Super+click Mouse-gestures
 	Mouse 0 A 4 StrokeFunc EchoSequence DrawMotion StrokeWidth 3
 
 ################################################################################
