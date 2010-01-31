@@ -90,7 +90,6 @@ yaluOptions = {
 	"PlaceMode" : {
 		"default": "MinOverlapPlacement",
 		"values": [
-			("Tile if possible, then cascade", "frequent"),
 			("Tile if possible, then cascade", "TileCascadePlacement"),
 			("Tile if possible, then manually place", "TileManualPlacement"),
 			("Place all windows manually", "ManualPlacement"),
