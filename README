@@ -1,0 +1,26 @@
+YALU: YetAnotherLevelUp -- An FVWM configuration.
+
+YALU is a configuration for the powerful FVWM window manager that provides a
+number of neat features, fully graphical configuration (and also fully
+text-based configuration if you preffer), reasonable performance and less
+torture than its predecessor: AnotherLevelUp.
+
+Requirements:
+	> FVWM 2.4 (or later)
+	> Python 2.5 (up until Python 3)
+	> Zenity
+	> Screen
+	> Dmenu
+	> Xload *
+	> Xclock *
+	> Stalonetray *
+
+* optional but presently will leave a big empty space if its missing
+
+Installation:
+* Put this directory in .yalu in your home folder.
+* Make FVWM read fvwmConfig on startup (e.g. in your .xinitrc or by symlinking it
+to a default FVWM configuration directory)
+
+Documentation (Read it!):
+Can be found in doc in LaTeX form or as a PDF. You should definately read this!
