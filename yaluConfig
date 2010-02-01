@@ -88,5 +88,5 @@ SetEnv yaluWindowTypeColours ""
 SetEnv yaluImageType "png"
 
 # The filename of the theme to use
-SetEnv yaluTheme "/home/jonathan/.yalu/themes/default"
+SetEnv yaluTheme "~/.yalu/themes/default"
 
