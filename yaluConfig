@@ -24,7 +24,7 @@ SetEnv yaluEditor "gvim"
 SetEnv yaluTerminal "xterm"
 
 # Web browser to use
-SetEnv yaluBrowser "google-chrome"
+SetEnv yaluBrowser "firefox"
 
 ################################################################################
 # Window Behaviour                                                             #
