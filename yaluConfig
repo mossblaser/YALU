@@ -88,6 +88,6 @@ SetEnv yaluWindowTypeColours ""
 SetEnv yaluImageType "png"
 
 # The filename of the theme to use
-SetEnv yaluTheme "/home/jonathan/.yalu/themes/default"
+SetEnv yaluTheme "~/.yalu/themes/default"
 
 AddToFunc userColours I Style "Calendar" BackColor #d900d9, ForeColor #ec88ec, HilightBack #ec88ec, HilightFore #000000
