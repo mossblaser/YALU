@@ -1,0 +1,29 @@
+%
+% "a4" document style option.
+% John Pavel, December 1986
+% Modified by Graham Gough, May 1987
+% Redefines the \textheight and \topmargin for A4 paper, as opposed to US paper.
+%% SliTeX test removed for LaTeX2e (DPC)
+%
+% Adjusting \textheight will adjust position of the bottom of the page.
+% Must preserve "(\textheight - \topskip) divides \baselineskip".
+% \topskip always appears to be 10pt.
+% So only add/subtract multiples of \baselineskip if you want shorter pages.
+%
+%
+\topmargin -45truept     %    Nominal distance from top of paper to top of page
+\textwidth=159truemm
+\oddsidemargin=0truemm \evensidemargin=0truemm
+
+\@ifclassloaded{slides}
+  {\textheight 240truemm}
+  {
+        \ifcase \@ptsize
+            % mods for 10 pt (\baselineskip=12pt)
+            \textheight 682pt  % Height of text (including footnotes and figures)
+        \or % mods for 11 pt (\baselineskip=13.6pt)
+            \textheight 690 pt    % Height of text (including footnotes and figures)
+        \or % mods for 12 pt  (\baselineskip=15pt)
+            \textheight 685 pt    % Height of text (including footnotes and figures)
+        \fi
+  }
