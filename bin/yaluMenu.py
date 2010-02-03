@@ -290,7 +290,11 @@ def generateExecHistory():
 	menu = Menu("execHistory")
 	
 	# Load the program history
-	rawExecHistory = open("yaluExec_history", "r").read()
+	try:
+		rawExecHistory = open("yaluExec_history", "r").read()
+	except IOError:
+		# File does not exist, assume it is blank
+		rawExecHistory = ""
 	
 	# Strip out blank lines
 	execHistory = []
