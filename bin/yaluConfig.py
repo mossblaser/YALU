@@ -277,19 +277,22 @@ class Option(object):
 		except KeyError:
 			return ""
 	
+	def getConfigLine(self, value):
+		return "SetEnv yalu%s \"%s\""%(self.name, value)
+	
 	def setValue(self, value):
 		# Load the config file (and store line-by-line)
 		config = open(self.configFile, "r").read()
 		
 		# Generate the new environment variable line
-		newConfigLine = "SetEnv yalu%s \"%s\""%(self.name, value)
+		newConfigLine = self.getConfigLine(value)
 		
 		# Check the file for the matching envvar and update it
 		regex = "SetEnv\s+yalu%s.*"%(self.name,)
 		config, noOfReplacements = re.subn(regex, newConfigLine, config)
 		
-		if noOfReplacements == 100:
-			config += "\n# Added by yaluConfig\n"
+		if noOfReplacements == 0:
+			config += "\n# Added automatically by yaluConfig.py\n"
 			config += "%s\n"%(newConfigLine,)
 		
 		# Send Fvwm command to set variable
@@ -310,10 +313,24 @@ if __name__ == "__main__":
 	# Move into the YALU dir so that all paths from now on can be relative
 	os.chdir(os.environ["LocalYALU"])
 	
+	# Check that a config file exists (if not, create it)
+	try:
+		open("yaluConfig", "r")
+	except IOError:
+		open("yaluConfig", "w").write(
+			"# See yaluConfig.example for help on editing this file or use the YALU menu\n"
+		)
+	
+	
 	if len(sys.argv) == 1:
+		print "'printAllDefaults' or..."
 		print "Available options:"
 		for option in yaluOptions:
 			print option
+	elif len(sys.argv) == 2 and sys.argv[1] == "printAllDefaults":
+		for option in yaluOptions:
+			opt = Option(option)
+			print opt.getConfigLine(opt.default)
 	elif len(sys.argv) == 2:
 		selectedOption = Option(sys.argv[1])
 		print selectedOption.value

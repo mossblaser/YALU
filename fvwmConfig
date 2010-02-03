@@ -49,6 +49,10 @@
 	
 	### Set the default shell to the yalu wrapper to enable custom working dirs ###
 	ExecUseShell "$[YALU]/bin/yaluShell"
+	
+	
+	### Load the default settings (to be overridden by user) ###
+	PipeRead "$[YALU]/bin/yaluConfig.py printAllDefaults"
 
 	### Load user configuration ###
 	Read "$[LocalYALU]/yaluConfig"
