@@ -9,6 +9,7 @@ Requirements:
 	> FVWM 2.4 (or later)
 	> Python 2.5 (up until Python 3)
 	> Zenity
+	> Feh
 	> Screen
 	> Dmenu
 	> Xload *
