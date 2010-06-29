@@ -818,10 +818,10 @@
 		
 		# Focus Direction
 		AddToFunc setPagingKeys
-			+ I Key Right A 4 Direction East (AcceptsFocus) WarpToWindow 50% 50% # Super+Right
-			+ I Key Left A 4 Direction West (AcceptsFocus) WarpToWindow 50% 50% # Super+Left
-			+ I Key Up A 4 Direction North (AcceptsFocus) WarpToWindow 50% 50% # Super+Up
-			+ I Key Down A 4 Direction South (AcceptsFocus) WarpToWindow 50% 50% # Super+Down
+			+ I Key Right A 4 Direction East (AcceptsFocus,CurrentDesk) WarpToWindow 50% 50% # Super+Right
+			+ I Key Left A 4 Direction West (AcceptsFocus,CurrentDesk) WarpToWindow 50% 50% # Super+Left
+			+ I Key Up A 4 Direction North (AcceptsFocus,CurrentDesk) WarpToWindow 50% 50% # Super+Up
+			+ I Key Down A 4 Direction South (AcceptsFocus,CurrentDesk) WarpToWindow 50% 50% # Super+Down
 		
 		# Flinging and Throwing Functions
 		AddToFunc bindFlingAndThrow
