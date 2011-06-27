@@ -110,7 +110,7 @@ function setWall {
 	
 	# If a valid option
 	if [ "$1" == "scale" -o \
-	     "$1" == "center" -o \
+		   "$1" == "center" -o \
 		   "$1" == "tile" -o \
 		   "$1" == "seamless" -o \
 		   "$1" == "colour" ]; then

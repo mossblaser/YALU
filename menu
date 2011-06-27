@@ -1,4 +1,4 @@
-File Browser {7412369}	nautilus --no-desktop
+File Browser {7412369}	nohup gnome-open "$PWD"&
 x&clock {3214789}
 x&lock
 
@@ -11,3 +11,5 @@ x&lock
 &Rhythmbox	rhythmbox
 
 Comman&d Escape Test	xmessage Hello\,\'\ -buttons\'\ \$hi -timeout 4
+
+S&helf Web	ssh shelf@shelf "export DISPLAY=\"0:0\"; chromium `xclip -o`"

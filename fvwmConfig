@@ -378,7 +378,7 @@
 					"Exec exec xload -fg $fg -bg $bg -update 1 -nolabel -geometry -300-300")
 		# Trayer (For Sys-tray icons)
 		+ I *yaluButtons: (3x1, Swallow (UseOld, Kill, NoHints) "stalonetray" \
-					"Exec exec stalonetray -bg $bg --no-shrink --icon-gravity W"\
+					"Exec exec stalonetray -bg $bg --no-shrink --icon-gravity W --dockapp-mode --kludges force_icons_size"\
 					Right)
 		# A simple clock
 		+ I *yaluButtons: (1x1, Swallow (UseOld) "xclock" \
