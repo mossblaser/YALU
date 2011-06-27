@@ -1,0 +1,13 @@
+# See yaluConfig.example for help on editing this file or use the YALU menu
+
+# Added automatically by yaluConfig.py
+SetEnv yaluBrowser "google-chrome"
+
+# Added automatically by yaluConfig.py
+SetEnv yaluDesks "2"
+
+# Added automatically by yaluConfig.py
+SetEnv yaluDeskWidth "3"
+
+# Added automatically by yaluConfig.py
+SetEnv yaluDeskHeight "3"
