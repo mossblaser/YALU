@@ -8,11 +8,11 @@ date
 echo "****************************************"
 
 if [ ! -n "$yaluDelayExitTime" -o "$yaluDelayExitTime" == "0" ]; then
-	nohup "$@" > /dev/null
+	nohup "$@" | cat > /dev/tty
 else
 	while true; do
 		set -a
-		nohup "$@" > /dev/null
+		nohup "$@" | cat > /dev/tty
 		exitStatus="$?"
 		echo "$test"
 		echo "****************************************"
