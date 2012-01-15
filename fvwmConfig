@@ -375,14 +375,14 @@
 		+ I *yaluButtons: Frame 0 # Invisible border
 		# Load monitor
 		+ I *yaluButtons: (1x1, Swallow "xload"\
-					"Exec exec xload -fg $fg -bg $bg -update 1 -nolabel -geometry -300-300")
+					"Exec exec xload -fg $fg -bg $bg -update 1 -nolabel -geometry -3000-3000")
 		# Trayer (For Sys-tray icons)
-		+ I *yaluButtons: (3x1, Swallow (UseOld, Kill, NoHints) "stalonetray" \
-					"Exec exec stalonetray -bg $bg --no-shrink --icon-gravity W --dockapp-mode --kludges force_icons_size"\
+		+ I *yaluButtons: (3x1, Swallow (UseOld, NoClose, Kill, NoHints) "stalonetray" \
+					"Exec exec stalonetray -geometry 1x1-3000-3000 -bg $bg --no-shrink --icon-gravity W --dockapp-mode --kludges force_icons_size"\
 					Right)
 		# A simple clock
 		+ I *yaluButtons: (1x1, Swallow (UseOld) "xclock" \
-					"Exec exec xclock -digital -brief -bg $bg -fg $fg -norender -padding 0"\
+					"Exec exec xclock -geometry -3000-3000 -digital -brief -bg $bg -fg $fg -norender -padding 0"\
 					Right)
 		+ I Style yaluButtons Sticky,NoHandles,NoTitle,NeverFocus
 	
